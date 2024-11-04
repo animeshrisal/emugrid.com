@@ -1,0 +1,24 @@
+.card {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  flex: row;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+.header-company {
+  margin-right: 0.5rem;
+}
+
+.header-location {
+  margin-left: 0.5rem;
+}
+
+.card>ul {
+  margin: 1rem 1rem;
+}
