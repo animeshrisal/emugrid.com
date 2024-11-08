@@ -3,7 +3,7 @@ import styles from './page.module.css';
 export default function Home() {
   return (
     <div className={styles.container}>
-      <h1>Hi, I'm Animesh Risal.</h1>
+      <h1>Hi, I&lsquo;m Animesh Risal.</h1>
       <br />
       <div>
         Contact: emugrid@proton.me
