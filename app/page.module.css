@@ -1,20 +1,4 @@
-.page {
-  --gray-rgb: 0, 0, 0;
-  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
-  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
 
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-
-  display: grid;
-  grid-template-rows: 20px 1fr 20px;
-  align-items: center;
-  justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
-  gap: 64px;
-  font-family: var(--font-geist-sans);
-}
 
 @media (prefers-color-scheme: dark) {
   .page {
@@ -28,11 +12,40 @@
 }
 
 .container {
-  margin: 3rem;
+  --gray-rgb: 0, 0, 0;
+  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
+  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
+
+  --button-primary-hover: #383838;
+  --button-secondary-hover: #f2f2f2;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 80px;
+  gap: 64px;
+  font-family: var(--font-geist-sans);
+}
+
+.blinking-block {
+  margin-top: 1rem;
+  margin-left: 1rem;
+  width: 1rem; /* Set the width of the block */
+  height: 2rem; /* Set the height of the block */
+  background-color: #e2e2e2; /* Commodore 64 green */
+  display: inline-block; /* Keep it inline or centered */
+  animation: blink 1s steps(1) infinite; /* Blinking animation */
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0; /* Makes the block invisible for a brief moment */
+  }
 }
 
 @media screen and (max-width: 600px) {
   .container {
-  margin: 1rem;
+    margin: 1rem;
   }
 }
