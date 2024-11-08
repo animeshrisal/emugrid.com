@@ -17,22 +17,7 @@ export default function Resume() {
         >
           <ul>
             <li>
-              Implement user interface for permission control, user invitation,
-              image gallery, auto saving image to the server and creating shareable
-              links.
-            </li>
-            <li>
-              Enabled users to create, manipulate, and share 3D box models, along
-              with a UI to control the box models using React, Redux, and a 3D GIS
-              Framework.
-            </li>
-            <li>
-              Created user interface that allows users to upload and interact with
-              their custom made 3D Models.
-            </li>
-            <li>
-              Modified a generic gizmo that allows users to rotate and translate in
-              the Z-Axis in the same mode.
+              Create frontend components using VueJS and Web APIs using Spring Boot
             </li>
           </ul>
         </ResumeCard>
