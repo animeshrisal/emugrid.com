@@ -19,7 +19,7 @@ export default function Home() {
         </p>
         <br />
         <p>You can find my resume <u><a href="/resume">here</a></u></p> 
-        <p>Projects that I've worked on <u><a href ="/projects">here</a></u></p>
+        <p>Projects that I&lsquo;ve worked on <u><a href ="/projects">here</a></u></p>
         <br />
         <p>An area of interest I&lsquo;ve picked up over the last few months is RISC-V and 6502 Emulation. </p>
         <br />
