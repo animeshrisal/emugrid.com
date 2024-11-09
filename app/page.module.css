@@ -11,6 +11,11 @@
   }
 }
 
+.page {
+  display: flex;
+  min-height: 100vh;
+}
+
 .container {
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
@@ -19,13 +24,12 @@
   --button-primary-hover: #383838;
   --button-secondary-hover: #f2f2f2;
 
+  overflow-x: scroll; 
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding: 80px;
   gap: 64px;
-  font-family: var(--font-geist-sans);
 }
 
 .blinking-block {
@@ -45,7 +49,11 @@
 }
 
 @media screen and (max-width: 600px) {
+  .page {
+  }
+
   .container {
-    margin: 1rem;
+    margin: 0.2rem;
+    padding: 1rem;
   }
 }

@@ -19,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${commodoreFont.className}`}>
-        {children}
+        <div className={`base-container`}>
+          {children}
+        </div>
       </body>
     </html>
   );
