@@ -22,6 +22,12 @@ export default function RootLayout({
         <div className={`base-container`}>
           {children}
         </div>
+        <div className={'button-group'}>
+          <div className={'green-light'} />
+          <div className={'button'}>
+            <div className={'button-icon'} />
+          </div>
+        </div>
       </body>
     </html>
   );
