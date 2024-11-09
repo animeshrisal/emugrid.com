@@ -1,7 +1,8 @@
+import { ReactNode } from 'react';
 import styles from './Window.module.scss';
 
 type WindowProps = {
- title: string;
+  title: string;
   children: ReactNode;
 }
 
@@ -11,9 +12,9 @@ const Window: React.FunctionComponent<WindowProps> = props => {
 
   return (
     <div className={styles.window}>
-      <div className={styles['window-header']}>{ title }</div>
+      <div className={styles['window-header']}>{title}</div>
       <div className={styles['window-container']}>
-        { children }
+        {children}
       </div>
     </div>
   )

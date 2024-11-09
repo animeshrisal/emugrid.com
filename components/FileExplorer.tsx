@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import styles from './FileExplorer.module.scss';
 
 type FileExplorerProps = {
@@ -8,7 +9,7 @@ const FileExplorer: React.FunctionComponent<FileExplorerProps> = props => {
   const { children } = props;
   return (
     <div className={styles.explorer}>
-      { children }
+      {children}
     </div>
   )
 }

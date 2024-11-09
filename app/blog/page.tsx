@@ -1,4 +1,5 @@
-export default function Blog() { return (
+export default function Blog() {
+  return (
     <div>Under construction!</div>
   )
 }

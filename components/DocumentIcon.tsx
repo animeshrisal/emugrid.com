@@ -6,15 +6,15 @@ type DocumentIconProps = {
 }
 
 const DocumentIconCard: React.FunctionComponent<DocumentIconProps> = props => {
-  
+
   const { text, url } = props;
 
   return (
-      <a href={url}
-      className={styles["document-container"]}> 
-        <div className={styles.folder}></div>
-        <div className={styles.text}>{text}</div>
-      </a>
+    <a href={url}
+      className={styles["document-container"]}>
+      <div className={styles.folder}></div>
+      <div className={styles.text}>{text}</div>
+    </a>
   )
 }
 
