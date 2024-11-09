@@ -42,6 +42,11 @@ a {
   }
 }
 
+.window {
+  background-color: white;
+  padding: 5px;
+}
+
 @media screen and (max-width: 600px) {
   html,
   body {

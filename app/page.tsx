@@ -1,4 +1,5 @@
 import styles from './page.module.css';
+import DocumentIconCard from "@/components/DocumentIcon.tsx"
 
 export default function Home() {
   return (
@@ -27,13 +28,16 @@ export default function Home() {
       </p> 
       <div>
       <br />
-      <br />
+
       <h2>Contact</h2> 
         <span>Email: emugrid@proton.me</span><span className={styles["blinking-block"]}></span>
       <br />
       </div>
+      <div className={styles.window}>
+        <DocumentIconCard text="Resume" />  
+        <DocumentIconCard text="Projects" />
       </div>
-
+      </div>
     </div>
   );
 }
