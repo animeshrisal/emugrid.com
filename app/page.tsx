@@ -3,7 +3,6 @@ import DocumentIconCard from "@/components/DocumentIcon.tsx"
 
 export default function Home() {
   return (
-
     <div className={styles.container}>
       <h1 className='header'>Emugrid OS v0.1</h1>
       <h1>Hi, I&lsquo;m Animesh Risal.</h1>
@@ -28,15 +27,18 @@ export default function Home() {
       </p> 
       <div>
       <br />
-
       <h2>Contact</h2> 
         <span>Email: emugrid@proton.me</span><span className={styles["blinking-block"]}></span>
       <br />
       </div>
       <div className={styles.window}>
-        <DocumentIconCard text="Resume" />  
-        <DocumentIconCard text="Projects" />
-      </div>
+          <div className={styles['window-header']}>My Computer</div>
+          <div className={styles["window-container"]}>
+            <DocumentIconCard text="Resume" />  
+            <DocumentIconCard text="Projects" />
+            <DocumentIconCard text="Blogs" />
+          </div>
+          </div>
       </div>
     </div>
   );
