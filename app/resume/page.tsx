@@ -1,13 +1,12 @@
 
 import ResumeCard from "@/components/ResumeCard";
 import styles from './page.module.scss';
+import Window from "@/components/Window.tsx"
 
 export default function Resume() {
   return (
+    <Window title="Work Experience">
     <div className={styles['container']}>
-      <div className={styles["container-header"]}>
-        <h1>Work Experience</h1>
-      </div>
       <div>
         <ResumeCard
           date="07.2023 - Present"
@@ -120,5 +119,6 @@ export default function Resume() {
         </ResumeCard>
       </div>
     </div>
+    </Window>
   )
 }
