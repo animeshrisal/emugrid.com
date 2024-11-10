@@ -20,7 +20,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${commodoreFont.className} monitor`}>
         <div className={`base-container`}>
-          {children}
+          <div className={`base-view`}>
+            {children}
+          </div>
+          <div className={`task-bar`}>
+            <div className={`task-bar-item`}>aboutme.txt</div>
+            <div className={`task-bar-item`}>Desktop</div>
+          </div>
         </div>
         <div className={`base-footer`}>
           <div className={'button-group'}>

@@ -5,7 +5,7 @@ import Window from "@/components/Window"
 
 export default function Resume() {
   return (
-    <Window title="Work Experience">
+    <Window title="resume.txt">
       <div className={styles['container']}>
         <div>
           <ResumeCard

@@ -8,7 +8,7 @@ export default function Home() {
     <div className={styles.container}>
       <h1 className='header'>Emugrid OS v0.1</h1>
       <div>
-        <Window title="About me">
+        <Window title="aboutme.txt">
           <div className={styles.notepad}>
             <p>
               I&lsquo;m currently a Masters student studying International Information System Science at Otto-Friedrich-Universität Bamberg.
@@ -24,8 +24,7 @@ export default function Home() {
             </div>
           </div>
         </Window>
-
-        <Window title="My computer">
+        <Window title="Desktop">
           <FileExplorer>
             <DocumentIconCard url="/resume" text="Resume" />
             <DocumentIconCard url="/projects" text="Projects" />
