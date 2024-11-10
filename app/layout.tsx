@@ -18,18 +18,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${commodoreFont.className}`}>
+      <body className={`${commodoreFont.className} monitor`}>
         <div className={`base-container`}>
           {children}
         </div>
-        <div className={'button-group'}>
-          <div className={'green-light'} />
-          <div className={'button'}>
-            <div className={'button-icon'} />
+        <div className={`base-footer`}>
+          <div className={'button-group'}>
+            <div className={'green-light'} />
+            <div className={'button'}>
+              <div className={'button-icon'} />
+            </div>
           </div>
         </div>
       </body>
     </html>
   );
 }
- 
+
