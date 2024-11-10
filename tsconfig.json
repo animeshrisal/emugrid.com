@@ -23,5 +23,5 @@
     },
   },
   "include": ["./app/risc-v-emulator/core/index.d.ts", "next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "./app/risc-v-emulator/core/main.js"]
 }
