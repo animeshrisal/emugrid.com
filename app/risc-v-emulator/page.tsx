@@ -2,30 +2,49 @@
 
 import { useEffect, useState } from 'react';
 import Module from './core/main.js';
+import { EmscriptenModule } from './core/index.js';
 
 export default function Emulator() {
 
-  const [fib, setFib] = useState<((n: number) => number) | undefined>(undefined);
-  const [test, setTest] = useState<((n: number) => number) | undefined>(undefined);
+  const [wasm, setWasm] = useState<EmscriptenModule | undefined>(undefined);
 
   useEffect(() => {
     Module().then((mod) => {
-      setFib(() => mod.cwrap("fib", "number", ["number"]))
-      setTest(() => mod.cwrap("test", "number", ["number"]))
+      setWasm(mod);
     })
   }, [])
 
-  if (!fib) {
-    return <div>Loading...</div>
-  }
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !wasm) return;
 
-  if (!test) {
+    const reader = new FileReader();
+
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      // Create a Uint8Array from the file's ArrayBuffer
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+
+      // Write the file to Emscripten's virtual filesystem
+      wasm.FS.writeFile('/elf_file.o', data);
+
+      // Call the C function `_process_file` with the filename
+      const test = wasm.ccall('read_elf_file', 'number', ['string'], ['/elf_file.o']);
+      console.log(test);
+    };
+
+    // Read the file as an ArrayBuffer
+    reader.readAsArrayBuffer(file);
+  };
+
+  if (!wasm) {
     return <div>Loading...</div>
-  }
+  };
+
   return (
     <div>
-      <div>{fib(5)}</div>
-      <div>{test(5)}</div>
+      <h1>Risc V - Emulator</h1>
+      <button onClick={() => wasm.ccall('handle_instruction', 'number', ['number'], [])}>Run next instruction</button>
+      <input type="file" onChange={handleFileChange} />
     </div>
   )
 }
