@@ -1,8 +1,18 @@
 #ifdef __EMSCRIPTEN__
 
-#include <emscripten/bind.h>
+#include <emscripten.h>
 
-std::string hello() { return "Hello from C++!"; }
+extern "C" {
+int test(int n) { return 1; }
 
-EMSCRIPTEN_BINDINGS(wasm_ar) { emscripten::function("hello", &hello); }
+int fib(int n) {
+  int i, t, a = 0, b = 1;
+  for (i = 0; i < n; i++) {
+    t = a + b;
+    a = b;
+    b = t;
+  }
+  return b;
+}
+}
 #endif // !EMSCRIPTEN
