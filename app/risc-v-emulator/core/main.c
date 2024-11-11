@@ -1,4 +1,3 @@
-
 #include "cpu.h"
 #include "elf.h"
 #include "stdio.h"
@@ -11,10 +10,19 @@
 #include <emscripten.h>
 #endif
 
-CPU cpu;
+CPU *cpu_instance = NULL;
 Bus bus;
 uint8 *text_section;
 size_t pc = 0;
+
+void allocate_CPU() { cpu_instance = (CPU *)malloc(sizeof(CPU)); };
+
+CPU *get_cpu_ptr() { return cpu_instance; }
+
+void free_cpu() {
+  free(cpu_instance);
+  cpu_instance = NULL;
+}
 
 struct shdr read_elf_header(FILE *f) {
   struct elfhdr ehdr;
@@ -56,7 +64,7 @@ struct shdr read_elf_header(FILE *f) {
 };
 
 int read_elf_file(const char *elf_file) {
-  cpu.bus = &bus;
+  cpu_instance->bus = &bus;
   FILE *file = fopen(elf_file, "r");
   int quit = 0;
 
@@ -70,8 +78,6 @@ int read_elf_file(const char *elf_file) {
     exit(1);
   }
 
-  printf("WRYYYY!");
-
   // Read the `.text` section into memory
   fread(text_section, 1, text.size + 4, file);
   printf("%p\n", text_section);
@@ -83,10 +89,10 @@ int read_elf_file(const char *elf_file) {
 int handle_instruction() {
   uint32 instruction = *(uint32 *)(text_section + pc);
   printf("%p\n", text_section);
-  run_instruction(&cpu, instruction);
+  run_instruction(cpu_instance, instruction);
 
   for (int i = 0; i < 32; i++) {
-    printf("%d ", (int)cpu.riscv_register[i]);
+    printf("%d ", (int)cpu_instance->riscv_register[i]);
   }
   printf("%d", pc);
   printf("\n");

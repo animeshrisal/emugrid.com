@@ -9,7 +9,7 @@ export default function Resume() {
       <div className={styles['container']}>
         <div>
           <ResumeCard
-            date="07.2023 - Present"
+            date="07.2024 - Present"
             position="Working Student - Software Engineer"
             company="Lion5"
             location="Bamberg, Bavaria, Germany"
