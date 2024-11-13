@@ -68,6 +68,7 @@ export default function Emulator() {
 
     // Read the file as an ArrayBuffer
     reader.readAsArrayBuffer(file);
+    handleNextInstruction();
   };
 
   if (!wasm) {
@@ -83,19 +84,17 @@ export default function Emulator() {
 
   const Registers = () => {
     if (cpu) {
-      return (
-        <div>
-          {cpu.riscv_register[0]}
-          {cpu.riscv_register[1]}
-          {cpu.riscv_register[2]}
-          {cpu.riscv_register[3]}
-          {cpu.riscv_register[4]}
-
-        </div>
-      )
+  const registerElements = [];
+  for (let i = 0; i < cpu.riscv_register.length; i++) {
+    registerElements.push(
+      <div key={i}>{`x${i}: ${cpu.riscv_register[i].toString()}`}</div>
+    );
+  }
+  
+  return <div>{registerElements}</div>;
     } else {
       return (
-        <div>Empty</div>
+        <div>Load an elf file to start running</div>
       )
     }
   }
