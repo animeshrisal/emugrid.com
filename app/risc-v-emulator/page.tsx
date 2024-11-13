@@ -102,7 +102,9 @@ export default function Emulator() {
   return (
     <div>
       <h1>Risc V - Emulator</h1>
+      { cpu && 
       <button onClick={() => handleNextInstruction()}>Run next instruction</button>
+      }
       <input type="file" onChange={handleFileChange} />
       <Registers />
     </div>
