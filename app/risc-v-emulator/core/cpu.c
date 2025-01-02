@@ -286,7 +286,17 @@ void run_instruction(CPU *cpu, uint32 instr) {
   case AUI:
     run_u_instructions(cpu, instr);
   default:
-    printf("Illeual instruction!!!\n");
+    printf("Illegal instruction!!!\n");
     break;
   }
+}
+
+typedef cache{
+  uint32 start_pc;
+  void *handlers;
+} Cache;
+
+void cache_basic_block(uint32 start_pc, void *handlers) {
+  cache[start_pc].start_pc = start_pc;
+  cache[start_pc].handlers = handlers;
 }

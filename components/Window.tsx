@@ -13,7 +13,7 @@ const Window: React.FunctionComponent<WindowProps> = props => {
   return (
     <div className={styles.window}>
       <div className={styles['window-header']}>{title}</div>
-      <div className={styles['window-container']}>
+      <div className={styles['window-container']}>      
         {children}
       </div>
     </div>
