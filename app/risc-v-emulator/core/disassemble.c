@@ -2,10 +2,9 @@
 #include "types.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 char *disassemble_instruction(uint32 instr) {
-  char *output;
+  char *output = "";
   int opcode = instr & 0x7f;
   int func3 = (instr >> 12) & 0x7;
   int func7 = (instr >> 25) & 0x7f;
@@ -23,7 +22,7 @@ char *disassemble_instruction(uint32 instr) {
     switch (func3) {
     case ADDSUB:
       if (func7 == ADD) {
-        sprintf(output, "add x%d, x%d, x%d", rd, rs1, rs2);
+        sprintf(output, "add x%d, x%d, x%d\n", rd, rs1, rs2);
       } else if (func7 == SUB) {
         sprintf(output, "sub x%d, x%d, x%d", rd, rs1, rs2);
       }
@@ -62,7 +61,7 @@ char *disassemble_instruction(uint32 instr) {
   case I:
     switch (func3) {
     case ADD:
-      sprintf(output, "addi x%d, x%d, %d", rd, rs1, imm);
+      sprintf(output, "addi x%d, x%d, %d\n", rd, rs1, imm);
       break;
     case XOR:
       sprintf(output, "xori x%d, x%d, %d", rd, rs1, imm);
@@ -173,16 +172,6 @@ char *disassemble_instruction(uint32 instr) {
     sprintf(output, "Unknown instruction");
     break;
   }
+
   return output;
-}
-
-char **disassemble_instructions(uint32 *instructions, uint32 num_instructions) {
-
-  char **disassemble_list = (char **)malloc(num_instructions * sizeof(char *));
-
-  for (uint32 i = 0; i < num_instructions; i++) {
-    disassemble_list[i] = disassemble_instruction(instructions[i]);
-  }
-
-  return disassemble_list;
 }

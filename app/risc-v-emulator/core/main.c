@@ -15,7 +15,6 @@ CPU *cpu_instance = NULL;
 Bus bus;
 uint8 *text_section;
 size_t pc = 0;
-char *disassembled_instructions[32];
 
 void allocate_CPU() { cpu_instance = (CPU *)malloc(sizeof(CPU)); };
 
@@ -34,7 +33,6 @@ struct shdr read_elf_header(FILE *f) {
     exit(EXIT_FAILURE);
   }
 
-  // Read elf file
   if (ehdr.magic[0] == ELF_MAGIC_0 && ehdr.magic[1] == ELF_MAGIC_1 &&
       ehdr.magic[2] == ELF_MAGIC_2 && ehdr.magic[3] == ELF_MAGIC_3) {
     printf("The file is a valid ELF file.\n");
@@ -42,14 +40,11 @@ struct shdr read_elf_header(FILE *f) {
     printf("The file is not a valid ELF file.\n");
   }
 
-  // Seek to Section Header Table
   fseek(f, ehdr.shoff, SEEK_SET);
 
-  // Read all section headers
   struct shdr *sections = malloc(ehdr.shnum * sizeof(struct shdr));
   int i = fread(sections, sizeof(struct shdr), ehdr.shnum, f);
 
-  // Locate the .text section
   char *shstrtab = NULL;
   struct shdr shstrtab_header = sections[ehdr.shstrndx];
 
@@ -71,7 +66,6 @@ int read_elf_file(const char *elf_file) {
   int quit = 0;
 
   struct shdr text = read_elf_header(file);
-  // Move to the `.text` section offset
   fseek(file, text.offset, SEEK_SET);
   text_section = malloc(text.size + 4);
   if (!text_section) {
@@ -80,27 +74,31 @@ int read_elf_file(const char *elf_file) {
     exit(1);
   }
 
-  // Read the `.text` section into memory
   fread(text_section, 1, text.size + 4, file);
-  printf("%p\n", text_section);
   fclose(file);
 
   return 1;
 }
 
 int handle_instruction() {
-
   uint32 instruction = *(uint32 *)(text_section + pc);
-  printf("%p\n", text_section);
   run_instruction(cpu_instance, instruction);
 
-  for (int i = 0; i < 32; i++) {
-    printf("%d ", (int)cpu_instance->riscv_register[i]);
-  }
-  printf("%d", pc);
-  printf("\n");
   pc += 4;
   return 1;
 }
 
-char **show_disassembled_code() { return disassembled_instructions; }
+char **show_disassembled_code() {
+
+  char **instructions = (char **)malloc(2 * sizeof(char *));
+  for (int i = 0; i < 1; i++) {
+    instructions[i] = NULL;
+  }
+
+  for (int i = 0; i < 1; i++) {
+    size_t current_pc = pc + i * 4;
+    uint32 instruction = *(uint32 *)(text_section + current_pc);
+    instructions[i] = disassemble_instruction(instruction);
+  }
+  return instructions;
+}

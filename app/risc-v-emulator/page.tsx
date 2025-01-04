@@ -41,6 +41,7 @@ export default function Emulator() {
 
   const [wasm, setWasm] = useState<EmscriptenModule | undefined>(undefined);
   const [cpu, setCPU] = useState<CPU | undefined>(undefined);
+  const [disassembleCode, setDisassembleCode] = useState<string[]>([]);
 
   useEffect(() => {
     Module().then((mod) => {
@@ -62,8 +63,7 @@ export default function Emulator() {
       wasm.FS.writeFile('/elf_file.o', data);
       wasm.ccall<void, void>('allocate_CPU', "NULL", [], []);
       // Call the C function `_process_file` with the filename
-      const test = wasm.ccall<number, string>('read_elf_file', 'number', ['string'], ['/elf_file.o']);
-      console.log(test);
+      wasm.ccall<number, string>('read_elf_file', 'number', ['string'], ['/elf_file.o']);
     };
 
     // Read the file as an ArrayBuffer
@@ -80,6 +80,7 @@ export default function Emulator() {
     const cpu_ptr = wasm.ccall<number, void[]>('get_cpu_ptr', 'number', [], []);
     const cpu = readCPU(cpu_ptr);
     setCPU(cpu);
+    wasm.ccall('show_disassembled_code', 'string', [], []);
   }
 
   const Registers = () => {
