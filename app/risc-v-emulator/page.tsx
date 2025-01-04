@@ -84,14 +84,14 @@ export default function Emulator() {
 
   const Registers = () => {
     if (cpu) {
-  const registerElements = [];
-  for (let i = 0; i < cpu.riscv_register.length; i++) {
-    registerElements.push(
-      <div key={i}>{`x${i}: ${cpu.riscv_register[i].toString()}`}</div>
-    );
-  }
-  
-  return <div>{registerElements}</div>;
+      const registerElements = [];
+      for (let i = 0; i < cpu.riscv_register.length; i++) {
+        registerElements.push(
+          <div key={i}>{`x${i}: ${cpu.riscv_register[i].toString()}`}</div>
+        );
+      }
+
+      return <div>{registerElements}</div>;
     } else {
       return (
         <div>Load an elf file to start running</div>
@@ -102,8 +102,8 @@ export default function Emulator() {
   return (
     <div>
       <h1>Risc V - Emulator</h1>
-      { cpu && 
-      <button onClick={() => handleNextInstruction()}>Run next instruction</button>
+      {cpu &&
+        <button onClick={() => handleNextInstruction()}>Run next instruction</button>
       }
       <input type="file" onChange={handleFileChange} />
       <Registers />

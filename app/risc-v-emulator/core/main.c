@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "disassemble.h"
 #include "elf.h"
 #include "stdio.h"
 #include <stddef.h>
@@ -14,6 +15,7 @@ CPU *cpu_instance = NULL;
 Bus bus;
 uint8 *text_section;
 size_t pc = 0;
+char *disassembled_instructions[32];
 
 void allocate_CPU() { cpu_instance = (CPU *)malloc(sizeof(CPU)); };
 
@@ -87,6 +89,7 @@ int read_elf_file(const char *elf_file) {
 }
 
 int handle_instruction() {
+
   uint32 instruction = *(uint32 *)(text_section + pc);
   printf("%p\n", text_section);
   run_instruction(cpu_instance, instruction);
@@ -99,3 +102,5 @@ int handle_instruction() {
   pc += 4;
   return 1;
 }
+
+char **show_disassembled_code() { return disassembled_instructions; }
