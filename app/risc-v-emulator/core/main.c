@@ -14,7 +14,10 @@
 CPU *cpu_instance = NULL;
 Bus bus;
 uint8 *text_section;
-size_t pc = 0;
+int text_size = 0;
+int pc = 0;
+int instruction_number = 0;
+int number_of_instructions = 0;
 
 void allocate_CPU() { cpu_instance = (CPU *)malloc(sizeof(CPU)); };
 
@@ -68,13 +71,14 @@ int read_elf_file(const char *elf_file) {
   struct shdr text = read_elf_header(file);
   fseek(file, text.offset, SEEK_SET);
   text_section = malloc(text.size + 4);
+  text_size = text.size;
   if (!text_section) {
     perror("Failed to allocate memory");
     fclose(file);
     exit(1);
   }
 
-  fread(text_section, 1, text.size + 4, file);
+  fread(text_section, 1, text.size, file);
   fclose(file);
 
   return 1;
@@ -84,21 +88,25 @@ int handle_instruction() {
   uint32 instruction = *(uint32 *)(text_section + pc);
   run_instruction(cpu_instance, instruction);
 
+  for (int i = 0; i < 32; i++) {
+    printf("%d ", (int)cpu_instance->riscv_register[i]);
+  }
   pc += 4;
-  return 1;
+  return pc / 4;
 }
 
-char **show_disassembled_code() {
+char *show_disassembled_code() {
+  static char buffer[1000];
+  memset(buffer, 0, sizeof(buffer));
 
-  char **instructions = (char **)malloc(2 * sizeof(char *));
-  for (int i = 0; i < 1; i++) {
-    instructions[i] = NULL;
+  int no_of_instructions = text_size / 4;
+
+  for (int i = 0; i < no_of_instructions; i++) {
+    uint32 instruction = *(uint32 *)(text_section + i * 4);
+    char *disassembled = disassemble_instruction(instruction);
+    strncat(buffer, disassembled, sizeof(buffer) - strlen(buffer) - 1);
+    strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
   }
 
-  for (int i = 0; i < 1; i++) {
-    size_t current_pc = pc + i * 4;
-    uint32 instruction = *(uint32 *)(text_section + current_pc);
-    instructions[i] = disassemble_instruction(instruction);
-  }
-  return instructions;
+  return buffer;
 }

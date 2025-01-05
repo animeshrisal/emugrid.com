@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 char *disassemble_instruction(uint32 instr) {
-  char *output = "";
+  char output[50];
   int opcode = instr & 0x7f;
   int func3 = (instr >> 12) & 0x7;
   int func7 = (instr >> 25) & 0x7f;
@@ -22,7 +22,7 @@ char *disassemble_instruction(uint32 instr) {
     switch (func3) {
     case ADDSUB:
       if (func7 == ADD) {
-        sprintf(output, "add x%d, x%d, x%d\n", rd, rs1, rs2);
+        sprintf(output, "add x%d, x%d, x%d", rd, rs1, rs2);
       } else if (func7 == SUB) {
         sprintf(output, "sub x%d, x%d, x%d", rd, rs1, rs2);
       }

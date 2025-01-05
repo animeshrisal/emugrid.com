@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Module from './core/main.js';
 import { CPU, EmscriptenModule } from './core/index.js';
+import InstructionList from './components/InstructionList';
+import styles from './page.module.scss';
 
 const RISC_V_REGISTER_OFFSET = 0;
 const PC_OFFSET = RISC_V_REGISTER_OFFSET + 32 * 8;
@@ -10,6 +12,11 @@ const CSR_OFFSET = PC_OFFSET + 8;
 
 
 export default function Emulator() {
+  const [wasm, setWasm] = useState<EmscriptenModule | undefined>(undefined);
+  const [cpu, setCPU] = useState<CPU | undefined>(undefined);
+  const [disassembleCode, setDisassembleCode] = useState<string[]>([]);
+  const [currentInstruction, setCurrentInstruction] = useState(0);
+
 
   function readCPU(ptr: number): CPU | undefined {
     if (wasm) {
@@ -25,7 +32,6 @@ export default function Emulator() {
         csr[i] = wasm.HEAPU32[(ptr + CSR_OFFSET) / 4 + i];
       }
 
-      // Assuming `bus` is not directly managed in JS for now
       const bus = null;
 
       return {
@@ -38,10 +44,6 @@ export default function Emulator() {
       return undefined;
     }
   }
-
-  const [wasm, setWasm] = useState<EmscriptenModule | undefined>(undefined);
-  const [cpu, setCPU] = useState<CPU | undefined>(undefined);
-  const [disassembleCode, setDisassembleCode] = useState<string[]>([]);
 
   useEffect(() => {
     Module().then((mod) => {
@@ -64,9 +66,14 @@ export default function Emulator() {
       wasm.ccall<void, void>('allocate_CPU', "NULL", [], []);
       // Call the C function `_process_file` with the filename
       wasm.ccall<number, string>('read_elf_file', 'number', ['string'], ['/elf_file.o']);
+      const listOfInstructions = wasm.ccall<string, void[]>('show_disassembled_code', 'string', [], []);
+
+      const disassembleC = listOfInstructions.split('\n')
+        .filter((instr: string) => instr.trim() !== '');
+
+      setDisassembleCode(disassembleC)
     };
 
-    // Read the file as an ArrayBuffer
     reader.readAsArrayBuffer(file);
     handleNextInstruction();
   };
@@ -76,11 +83,12 @@ export default function Emulator() {
   };
 
   const handleNextInstruction = () => {
-    wasm.ccall('handle_instruction', 'number', ['number'], [])
+    const pc = wasm.ccall<number, number>('handle_instruction', 'number', ['number'], [])
     const cpu_ptr = wasm.ccall<number, void[]>('get_cpu_ptr', 'number', [], []);
+    setCurrentInstruction(pc);
     const cpu = readCPU(cpu_ptr);
     setCPU(cpu);
-    wasm.ccall('show_disassembled_code', 'string', [], []);
+
   }
 
   const Registers = () => {
@@ -100,6 +108,7 @@ export default function Emulator() {
     }
   }
 
+
   return (
     <div>
       <h1>Risc V - Emulator</h1>
@@ -107,7 +116,10 @@ export default function Emulator() {
         <button onClick={() => handleNextInstruction()}>Run next instruction</button>
       }
       <input type="file" onChange={handleFileChange} />
-      <Registers />
-    </div>
+      <div className={styles['emulator-container']} >
+        <Registers />
+        <InstructionList instructions={disassembleCode} current={currentInstruction} />
+      </div>
+    </div >
   )
 }

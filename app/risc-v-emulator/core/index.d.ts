@@ -9,10 +9,6 @@ export interface CPU {
   bus: number | null;            // Pointer to Bus (null if not used)
 }
 
-export interface registers {
-
-}
-
 export interface RiscVRegisters {
   x0: number;
   x1: number;

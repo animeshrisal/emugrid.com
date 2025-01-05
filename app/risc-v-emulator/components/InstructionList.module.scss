@@ -1,0 +1,12 @@
+.instruction-container {
+  border: 1px solid white;
+  padding: 2rem;
+
+  .header {
+    padding-bottom: 2rem;
+  }
+
+  .inactive-code {
+    display: none;
+  }
+}
