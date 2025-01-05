@@ -1,9 +1,9 @@
 import React from 'react';
 import styles from './InstructionList.module.scss';
 
-export interface InsructionList {
-  instructions: string[],
-  current: number
+type InstructionList = {
+  instructions: string[];
+  current: number;
 }
 
 export default function InstructionList({ instructions, current }: InstructionList) {
