@@ -87,10 +87,7 @@ int read_elf_file(const char *elf_file) {
 int handle_instruction() {
   uint32 instruction = *(uint32 *)(text_section + pc);
   run_instruction(cpu_instance, instruction);
-
-  for (int i = 0; i < 32; i++) {
-    printf("%d ", (int)cpu_instance->riscv_register[i]);
-  }
+  printf("-%d-\n", instruction);
   pc += 4;
   return pc / 4;
 }
