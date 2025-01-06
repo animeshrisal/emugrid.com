@@ -101,10 +101,10 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
     regs[rd] = regs[rs1] << (imm & 0x1F);
     break;
   case SRL:
-    if ((imm >> 10) & 1) { // SRAI: Shift right arithmetic immediate
-      regs[rd] = (int32)regs[rs1] >> (imm & 0x1F); // Sign-extend shift
-    } else { // SRLI: Shift right logical immediate
-      regs[rd] = (uint32)regs[rs1] >> (imm & 0x1F); // Zero-extend shift
+    if ((imm >> 10) & 1) {
+      regs[rd] = (int32)regs[rs1] >> (imm & 0x1F);
+    } else {
+      regs[rd] = (uint32)regs[rs1] >> (imm & 0x1F);
     }
     break;
 
@@ -265,26 +265,32 @@ void run_u_instructions(CPU *cpu, uint32 instr) {
 
 void run_instruction(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7f;
-
+  printf("%d\n", opcode);
   switch (opcode) {
   case R:
     run_r_instructions(cpu, instr);
+    cpu->pc += 4;
     break;
   case I:
     run_i_instructions(cpu, instr);
+    cpu->pc += 4;
     break;
   case L:
     run_l_instructions(cpu, instr);
+    cpu->pc += 4;
     break;
   case S:
     run_s_instructions(cpu, instr);
+    cpu->pc += 4;
     break;
   case B:
     run_b_instructions(cpu, instr);
+    cpu->pc += 4;
     break;
   case LUI:
   case AUI:
     run_u_instructions(cpu, instr);
+    cpu->pc += 4;
   default:
     printf("Illegal instruction!!!\n");
     break;

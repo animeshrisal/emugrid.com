@@ -85,11 +85,9 @@ int read_elf_file(const char *elf_file) {
 }
 
 int handle_instruction() {
-  uint32 instruction = *(uint32 *)(text_section + pc);
+  uint32 instruction = *(uint32 *)(text_section + cpu_instance->pc);
   run_instruction(cpu_instance, instruction);
-  printf("-%d-\n", instruction);
-  pc += 4;
-  return pc / 4;
+  return cpu_instance->pc / 4;
 }
 
 char *show_disassembled_code() {
@@ -97,7 +95,7 @@ char *show_disassembled_code() {
   memset(buffer, 0, sizeof(buffer));
 
   int no_of_instructions = text_size / 4;
-
+  printf("No of instructions %d", no_of_instructions);
   for (int i = 0; i < no_of_instructions; i++) {
     uint32 instruction = *(uint32 *)(text_section + i * 4);
     char *disassembled = disassemble_instruction(instruction);
