@@ -126,10 +126,8 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
 void run_b_instructions(CPU *cpu, uint32 instr) {
   int rs1 = rs1(instr);
   int rs2 = rs2(instr);
-  int32 imm = (int32)(instr >> 20); // Extract imm[11:0] (12 bits)
-  if (imm & 0x800) {                // If the sign bit (bit 11) is set,
-    imm |= 0xFFFFF000;              // sign-extend to 32 bits
-  }
+  int32 imm = ((int32)(instr & 0x80000000) >> 19) | ((instr & 0x80) << 4) |
+              ((instr >> 20) & 0x7e0) | ((instr >> 7) & 0x1e);
 
   int func3 = (instr >> 12) & 0x7; // func3 (3 bit
   //

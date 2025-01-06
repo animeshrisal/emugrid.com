@@ -135,6 +135,8 @@ char *disassemble_instruction(uint32 instr) {
     break;
 
   case B:
+    imm = ((int32)(instr & 0x80000000) >> 19) | ((instr & 0x80) << 4) |
+          ((instr >> 20) & 0x7e0) | ((instr >> 7) & 0x1e);
     switch (func3) {
     case BEQ:
       sprintf(output, "beq x%d, x%d, %d", rs1, rs2, imm);

@@ -5,7 +5,7 @@
 #define I 0b0010011
 #define L 0b00000011
 #define S 0b0100011
-#define B 0b11000011
+#define B 0b1100011
 #define LUI 0b0110111
 #define AUI 0b0010111
 
