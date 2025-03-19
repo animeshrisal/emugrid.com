@@ -273,8 +273,8 @@ void run_u_instructions(CPU *cpu, uint32 instr) {
 
 void run_priviledge_mode(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7f;
-
-  switch (opcode) {
+  int priv = instr >> 25 & 0x7f;
+  switch (priv) {
   case MRET:
     cpu->pc = cpu->mepc;
     cpu->mode = MACHINE;
@@ -290,7 +290,7 @@ void run_priviledge_mode(CPU *cpu, uint32 instr) {
   }
 }
 
-void run_csr_instruction(CPU *cpu, uint32 instr) {
+void run_csr_instructions(CPU *cpu, uint32 instr) {
 
   int opcode = instr & 0x7f;
   int rd = rd(instr);

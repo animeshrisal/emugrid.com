@@ -2,6 +2,7 @@
 #include "disassemble.h"
 #include "elf.h"
 #include "stdio.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,8 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
+#include <emscripten/threading.h>
 #endif
 
 CPU *cpu_instance = NULL;
@@ -84,10 +87,17 @@ int read_elf_file(const char *elf_file) {
   return 1;
 }
 
-int handle_instruction() {
+bool one_iter() {
   uint32 instruction = *(uint32 *)(text_section + cpu_instance->pc);
   run_instruction(cpu_instance, instruction);
   return cpu_instance->pc / 4;
+  return true;
+}
+
+int handle_instruction() {
+#ifdef __EMSCRIPTEN__
+  emscripten_request_animation_frame_loop(one_iter, 0);
+#endif
 }
 
 char *show_disassembled_code() {
