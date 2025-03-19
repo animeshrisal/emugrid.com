@@ -3,9 +3,20 @@
 #include "types.h"
 #include <stdio.h>
 
+uint64 mtval;
+uint64 stval;
+uint64 mepc;
+uint64 sepc;
+uint64 mscratch;
+uint64 sscratch;
+uint64 mcause;
+uint64 scause;
+uint64 mtvec;
+uint64 stvec;
+
 void create_cpu(CPU *cpu) {
   for (int i = 0; i < 32; i++) {
-    cpu->riscv_register[i] = 0;
+    cpu->x[i] = 0;
   }
   cpu->pc = DRAM_BASE;
   for (int i = 0; i < 4096; i++) {
@@ -21,7 +32,7 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
   int rd = rd(instr);
   int rs1 = rs1(instr);
   int rs2 = rs2(instr);
-  uint64 *regs = cpu->riscv_register;
+  uint64 *regs = cpu->x;
   switch (func3) {
   case ADDSUB:
     switch (func7) {
@@ -40,11 +51,11 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
 
   case SLT:
 
-    regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0; // Set Less Than
+    regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0;
     break;
 
   case SLTU:
-    regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0; // Set Less Than Unsigned
+    regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0;
     break;
 
   case XOR:
@@ -52,9 +63,9 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
     break;
   case SRL:
     if (func7 == SRL) {
-      regs[rd] = regs[rs1] >> regs[rs2]; // Shift Right Logical
+      regs[rd] = regs[rs1] >> regs[rs2];
     } else if (func7 == SRA) {
-      regs[rd] = (int)regs[rs1] >> regs[rs2]; // Shift Right Arithmetic
+      regs[rd] = (int)regs[rs1] >> regs[rs2];
     }
     break;
 
@@ -72,8 +83,7 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
 }
 
 void run_i_instructions(CPU *cpu, uint32 instr) {
-  int func3 = (instr >> 12) & 0x7; // func3 (3 bits)
-
+  int func3 = (instr >> 12) & 0x7;
   int rd = rd(instr);
   int rs1 = rs1(instr);
 
@@ -83,7 +93,7 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
     imm |= 0xFFFFF000;
   }
 
-  uint64 *regs = cpu->riscv_register;
+  uint64 *regs = cpu->x;
   switch (func3) {
   case ADD:
     regs[rd] = regs[rs1] + imm;
@@ -105,7 +115,7 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
       regs[rd] = (int32)regs[rs1] >> (imm & 0x1F);
     } else {
       regs[rd] = (uint32)regs[rs1] >> (imm & 0x1F);
-    }
+    };
     break;
 
   case SRA:
@@ -184,8 +194,8 @@ void run_l_instructions(CPU *cpu, uint32 instr) {
     imm |= 0xFFFFF000; // Sign-extend immediate
   }
 
-  uint64 addr = cpu->riscv_register[rs1] + imm;
-  uint64 *regs = cpu->riscv_register;
+  uint64 addr = cpu->x[rs1] + imm;
+  uint64 *regs = cpu->x;
 
   switch (func3) {
   case LB:
@@ -222,8 +232,8 @@ void run_s_instructions(CPU *cpu, uint32 instr) {
     imm |= 0xFFFFF000; // Sign-extend immediate
   }
 
-  uint64 addr = cpu->riscv_register[rs1] + imm;
-  uint64 value = cpu->riscv_register[rs2];
+  uint64 addr = cpu->x[rs1] + imm;
+  uint64 value = cpu->x[rs2];
 
   switch (func3) {
   case SB:
@@ -246,7 +256,7 @@ void run_u_instructions(CPU *cpu, uint32 instr) {
   int rd = rd(instr);
   int32 imm = instr & 0xFFFFF000; // Upper 20 bits for U-type immediate
 
-  uint64 *regs = cpu->riscv_register;
+  uint64 *regs = cpu->x;
 
   switch (opcode) {
   case LUI:
@@ -257,6 +267,110 @@ void run_u_instructions(CPU *cpu, uint32 instr) {
     break;
   default:
     printf("Illegal U-type instruction\n");
+    break;
+  }
+}
+
+void run_priviledge_mode(CPU *cpu, uint32 instr) {
+  int opcode = instr & 0x7f;
+
+  switch (opcode) {
+  case MRET:
+    cpu->pc = cpu->mepc;
+    cpu->mode = MACHINE;
+    break;
+
+  case SRET:
+    cpu->pc = cpu->spec;
+    cpu->mode = SUPERVISOR;
+    break;
+
+  default:
+    printf("Illegal privilege instruction");
+  }
+}
+
+void run_csr_instruction(CPU *cpu, uint32 instr) {
+
+  int opcode = instr & 0x7f;
+  int rd = rd(instr);
+  int rs1 = rs1(instr);
+  int csr = (instr >> 20) & 0xFFF;
+  uint32 rs1_value = cpu->x[rs1];
+  uint32 csr_value = cpu->csr[csr];
+
+  switch (opcode) {
+  case CSRRW:
+    if (rd) {
+      cpu->x[rd] = csr_value;
+    }
+    cpu->csr[csr] = rs1_value;
+    break;
+
+  case CSRRS:
+    if (rd)
+      cpu->x[rd] = csr_value;
+    cpu->csr[csr] |= rs1_value;
+    break;
+  case CSRRC:
+    if (rd)
+      cpu->x[rd] = csr_value;
+    cpu->csr[csr] &= ~rs1_value;
+    break;
+  case CSRRWI:
+    if (rd)
+      cpu->x[rd] = csr_value;
+    cpu->csr[csr] = rs1 & 0x1F;
+    break;
+  case CSRRSI:
+    if (rd)
+      cpu->x[rd] = csr_value;
+    cpu->csr[csr] |= rs1 & 0x1F;
+    break;
+  case CSRRCI:
+    if (rd)
+      cpu->x[rd] = csr_value;
+    cpu->csr[csr] &= ~(rs1 & 0x1F);
+    break;
+
+  default:
+    break;
+  }
+}
+
+void exec_jal(CPU *cpu, uint32 instr) {
+  int32 imm =
+      ((instr & 0x80000000) ? 0xFFF00000 : 0) | // imm[20] (sign extension)
+      ((instr >> 21) & 0x3FF) |                 // imm[10:1]
+      ((instr >> 20) & 0x1) << 10 |             // imm[11]
+      ((instr >> 12) & 0xFF) << 11;             // imm[19:12]
+
+  int rd = rd(instr);
+  cpu->x[rd] = cpu->pc;
+  cpu->pc = cpu->pc + (int64)imm - 4;
+}
+
+void exec_jalr(CPU *cpu, uint32 instr) {
+  int rs1 = rs1(instr);
+  int rd = rd(instr);
+  int imm = ((int32)instr >> 20);
+  uint64 pc = (cpu->x[rs1] + imm) & 0xffffffe;
+  cpu->x[rd] = cpu->pc + 4;
+  cpu->pc = pc;
+}
+
+void run_j_instructions(CPU *cpu, uint32 instr) {
+  int rd = rd(instr);
+
+  int opcode = instr & 0x7f;
+  int rs1 = rs1(instr);
+  switch (opcode) {
+  case JAL:
+    exec_jal(cpu, instr);
+    break;
+
+  case JALR:
+    exec_jalr(cpu, instr);
     break;
   }
 }
@@ -289,8 +403,15 @@ void run_instruction(CPU *cpu, uint32 instr) {
   case AUI:
     run_u_instructions(cpu, instr);
     cpu->pc += 4;
+    break;
+  case CSR:
+    run_csr_instructions(cpu, instr);
+    cpu->pc += 4;
+    break;
+  case JAL:
+  case JALR:
+    run_j_instructions(cpu, instr);
   default:
-    printf("Illegal instruction!!!\n");
     break;
   }
 }
