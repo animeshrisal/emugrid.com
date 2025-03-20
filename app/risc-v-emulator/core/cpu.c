@@ -271,22 +271,57 @@ void run_u_instructions(CPU *cpu, uint32 instr) {
   }
 }
 
-void run_priviledge_mode(CPU *cpu, uint32 instr) {
+uint64 load_csr(CPU *cpu, uint32 address) { return cpu->csr[address]; }
+
+void store_csr(CPU *cpu, uint32 address, uint64 value) {
+  cpu->csr[address] = value;
+}
+
+void run_privileged_mode(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7f;
-  int priv = instr >> 25 & 0x7f;
+  int priv = (instr >> 25) & 0x7f; // Correct masking and shifting
+
   switch (priv) {
   case MRET:
     cpu->pc = cpu->mepc;
-    cpu->mode = MACHINE;
+
+    unsigned int mstatus = load_csr(cpu, MSTATUS);
+
+    if ((mstatus >> MPIE_BIT) & 1) {
+      mstatus |= (1 << MIE_BIT);
+    } else {
+      mstatus &= ~(1 << MIE_BIT);
+    }
+
+    mstatus |= (1 << MPIE_BIT);
+
+    mstatus &= ~(0b11 << 11);
+
+    store_csr(cpu, MSTATUS, mstatus);
+    cpu->mode = (mstatus >> 11) & 0b11;
     break;
 
   case SRET:
-    cpu->pc = cpu->spec;
-    cpu->mode = SUPERVISOR;
+    cpu->pc = cpu->sepc;
+    unsigned int sstatus = load_csr(cpu, (uint8)SSTATUS);
+
+    if ((sstatus >> SPIE_BIT) & 1) {
+      sstatus |= (1 << SIE_BIT);
+    } else {
+      sstatus &= ~(1 << SIE_BIT);
+    }
+
+    sstatus |= (1 << SPIE_BIT);
+
+    sstatus &= ~(1 << 8);
+
+    store_csr(cpu, SSTATUS, sstatus);
+    cpu->mode = (sstatus >> 8) & 1 ? SUPERVISOR : USER;
     break;
 
   default:
-    printf("Illegal privilege instruction");
+    printf("Illegal privilege instruction\n");
+    break;
   }
 }
 

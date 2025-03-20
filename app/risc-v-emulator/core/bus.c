@@ -1,5 +1,10 @@
 #include "bus.h"
 
+uint64 load(Bus *bus, uint64 address) {
+  if UART_BASE
+    <= address &&address < UART_BASE + UART_SIZE
+}
+
 uint8 bus_read8(Bus *bus, uint64 address) {
   return (uint8)bus->memory[address];
 }

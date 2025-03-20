@@ -36,7 +36,6 @@ export default function Emulator() {
   }
 
   function readCPU(ptr: number): CPU | undefined {
-    console.log("Wryy!")
     if (wasm) {
       const riscv_register = new BigInt64Array(32);
       for (let i = 0; i < 32; i++) {
@@ -69,12 +68,6 @@ export default function Emulator() {
     })
   }, [])
 
-  useEffect(() => {
-    console.log("Wryy!")
-
-  }, [wasm])
-
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !wasm) return;
@@ -100,7 +93,7 @@ export default function Emulator() {
     };
 
     reader.readAsArrayBuffer(file);
-    handleStartExecution();
+    handleNextInstruction();
   };
 
   if (!wasm) {

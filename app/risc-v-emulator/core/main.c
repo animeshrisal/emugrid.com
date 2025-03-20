@@ -10,7 +10,6 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/html5.h>
-#include <emscripten/threading.h>
 #endif
 
 CPU *cpu_instance = NULL;

@@ -2,12 +2,14 @@
 #define BUS_H
 
 #include "types.h"
+#include "uart.h"
 
 #define DRAM_SIZE 1 * 1024 * 1204 // 1 GB RAM
 #define DRAM_BASE 0x80000000
 
 typedef struct Bus {
   uint64 memory[DRAM_SIZE];
+  Uart uart;
 } Bus;
 
 uint8 bus_read8(Bus *bus, uint64 address);
