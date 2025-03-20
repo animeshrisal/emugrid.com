@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Module from './core/main.js';
 import { CPU, EmscriptenModule } from './core/index.js';
 import InstructionList from './components/InstructionList';
 import styles from './page.module.scss';
+import Uart from './components/Uart';
 
 const RISC_V_REGISTER_OFFSET = 0;
 const PC_OFFSET = RISC_V_REGISTER_OFFSET + 32 * 8;
@@ -16,9 +17,26 @@ export default function Emulator() {
   const [cpu, setCPU] = useState<CPU | undefined>(undefined);
   const [disassembleCode, setDisassembleCode] = useState<string[]>([]);
   const [currentInstruction, setCurrentInstruction] = useState(0);
+  const runningRef = useRef<boolean>(false);
 
+  const runEmulatorLoop = () => {
+    if (!runningRef.current) return;
+
+    handleNextInstruction();
+    requestAnimationFrame(runEmulatorLoop);
+  }
+
+  const handleStartExecution = () => {
+    runningRef.current = true;
+    runEmulatorLoop();
+  }
+
+  const handleStopExecution = () => {
+    runningRef.current = false;
+  }
 
   function readCPU(ptr: number): CPU | undefined {
+    console.log("Wryy!")
     if (wasm) {
       const riscv_register = new BigInt64Array(32);
       for (let i = 0; i < 32; i++) {
@@ -51,6 +69,12 @@ export default function Emulator() {
     })
   }, [])
 
+  useEffect(() => {
+    console.log("Wryy!")
+
+  }, [wasm])
+
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !wasm) return;
@@ -72,10 +96,11 @@ export default function Emulator() {
         .filter((instr: string) => instr.trim() !== '');
 
       setDisassembleCode(disassembleC)
+
     };
 
     reader.readAsArrayBuffer(file);
-    handleNextInstruction();
+    handleStartExecution();
   };
 
   if (!wasm) {
@@ -112,12 +137,17 @@ export default function Emulator() {
   return (
     <div>
       <h1>Risc V - Emulator</h1>
-      {cpu &&
+      {cpu && <div>
         <button onClick={() => handleNextInstruction()}>Run next instruction</button>
+        <button onClick={() => handleStopExecution()}>Stop instruction</button>
+        <button onClick={() => handleStartExecution()}>Continue Execution</button>
+      </div>
       }
+
       <input type="file" onChange={handleFileChange} />
       <div className={styles['emulator-container']} >
         <Registers />
+        <Uart />
         <InstructionList instructions={disassembleCode} current={currentInstruction} />
       </div>
     </div >

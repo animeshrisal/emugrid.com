@@ -377,7 +377,6 @@ void run_j_instructions(CPU *cpu, uint32 instr) {
 
 void run_instruction(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7f;
-  printf("%d\n", opcode);
   switch (opcode) {
   case R:
     run_r_instructions(cpu, instr);
