@@ -336,35 +336,28 @@ void run_csr_instructions(CPU *cpu, uint32 instr) {
 
   switch (opcode) {
   case CSRRW:
-    if (rd) {
-      cpu->x[rd] = csr_value;
-    }
+    cpu->x[rd] = csr_value;
     cpu->csr[csr] = rs1_value;
     break;
 
   case CSRRS:
-    if (rd)
-      cpu->x[rd] = csr_value;
+    cpu->x[rd] = csr_value;
     cpu->csr[csr] |= rs1_value;
     break;
   case CSRRC:
-    if (rd)
-      cpu->x[rd] = csr_value;
+    cpu->x[rd] = csr_value;
     cpu->csr[csr] &= ~rs1_value;
     break;
   case CSRRWI:
-    if (rd)
-      cpu->x[rd] = csr_value;
+    cpu->x[rd] = csr_value;
     cpu->csr[csr] = rs1 & 0x1F;
     break;
   case CSRRSI:
-    if (rd)
-      cpu->x[rd] = csr_value;
+    cpu->x[rd] = csr_value;
     cpu->csr[csr] |= rs1 & 0x1F;
     break;
   case CSRRCI:
-    if (rd)
-      cpu->x[rd] = csr_value;
+    cpu->x[rd] = csr_value;
     cpu->csr[csr] &= ~(rs1 & 0x1F);
     break;
 
@@ -449,3 +442,63 @@ void run_instruction(CPU *cpu, uint32 instr) {
     break;
   }
 }
+
+bool check_pending_interrupts(CPU *cpu) {
+
+  int irq;
+  switch (cpu->mode) {
+  case SUPERVISOR:
+    if ((load_csr(cpu, MSTATUS) >> 3) & 1 == 0) {
+      return false;
+    }
+    break;
+  case MACHINE:
+    if ((load_csr(cpu, MSTATUS) >> 1) & 1 == 0) {
+      return false;
+    }
+    break;
+  default:
+    printf("Illegal instruction!");
+    break;
+  }
+
+  if (cpu->bus->uart->is_interrupting) {
+    irq = UART_IRQ;
+  }
+}
+
+void take_interrupt_trap(CPU *cpu) {
+  int exception_pc = cpu->pc;
+  int prev_mode = cpu->mode;
+  int cause;
+}
+
+void take_trap(CPU *cpu, int cause) {
+  int prev_mode = cpu->mode;
+  int exception_pc = cpu->pc + 4;
+
+  unsigned int mstatus = load_csr(cpu, MSTATUS);
+  if (prev_mode == SUPERVISOR) {
+    // to do
+  } else {
+    cpu->mode = MACHINE;
+    cpu->pc = load_csr(cpu, MTVEC) & !1;
+
+    store_csr(cpu, MEPC, exception_pc & !1);
+    store_csr(cpu, MCAUSE, cause);
+    store_csr(cpu, MTVAL, 0);
+
+    if ((mstatus >> MPIE_BIT) & 1) {
+      mstatus |= (1 << MIE_BIT);
+    } else {
+      mstatus &= ~(1 << MIE_BIT);
+    }
+
+    store_csr(cpu, MSTATUS, mstatus & !(1 << 3));
+    store_csr(cpu, MSTATUS, mstatus & !(0b11 << 11));
+  }
+}
+
+void run_ecall() {}
+
+void take_interrupt_traps(CPU *cpu) {}

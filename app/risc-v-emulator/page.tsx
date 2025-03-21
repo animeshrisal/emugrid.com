@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Module from './core/main.js';
-import { CPU, EmscriptenModule } from './core/index.js';
+import { CPU, EmscriptenModule, UART } from './core/index.js';
 import InstructionList from './components/InstructionList';
 import styles from './page.module.scss';
 import Uart from './components/Uart';
@@ -18,6 +18,18 @@ export default function Emulator() {
   const [disassembleCode, setDisassembleCode] = useState<string[]>([]);
   const [currentInstruction, setCurrentInstruction] = useState(0);
   const runningRef = useRef<boolean>(false);
+  const [text, setText] = useState("");
+  const [uart, setUart] = useState<UART | undefined>(undefined);
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      setText((prev: string) => prev + event.key); // Append each key to the text
+    };
+
+    window.addEventListener('keydown', handleKeyPress)
+
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, []);
 
   const runEmulatorLoop = () => {
     if (!runningRef.current) return;
@@ -62,6 +74,16 @@ export default function Emulator() {
     }
   }
 
+  function readUart(ptr: number): UART | undefined {
+    if (wasm) {
+      for (let i = 0; i < 100; i++) {
+        wasm.HEAPU8[(ptr) + i] = 'a';
+      }
+    } else {
+      return undefined;
+    }
+  }
+
   useEffect(() => {
     Module().then((mod) => {
       setWasm(mod);
@@ -101,11 +123,14 @@ export default function Emulator() {
   };
 
   const handleNextInstruction = () => {
-    const pc = wasm.ccall<number, number>('handle_instruction', 'number', ['number'], [])
+    const pc = wasm.ccall<number, number>('main_loop', 'number', ['number'], [])
     const cpu_ptr = wasm.ccall<number, void[]>('get_cpu_ptr', 'number', [], []);
+    const uart_ptr = wasm.ccall<number, void[]>('get_uart_ptr', 'number', [], []);
     setCurrentInstruction(pc);
-    const cpu = readCPU(cpu_ptr);
-    setCPU(cpu);
+    const _cpu = readCPU(cpu_ptr);
+    const _uart = readUart(uart_ptr);
+    setCPU(_cpu);
+    setUart(_uart);
 
   }
 
@@ -141,6 +166,8 @@ export default function Emulator() {
       <div className={styles['emulator-container']} >
         <Registers />
         <Uart />
+
+        <div id="inputBuffer" className={styles['hide']}>{text}</div>
         <InstructionList instructions={disassembleCode} current={currentInstruction} />
       </div>
     </div >

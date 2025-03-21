@@ -186,4 +186,6 @@ void run_j_instructions(CPU *cpu, uint32 instr);
 void run_csr_instructions(CPU *cpu, uint32 instr);
 void run_priviledge_mode(CPU *cpu, uint32 instr);
 uint32 cpu_fetch_instruction(Bus *bus);
+bool check_pending_interrupts(CPU *cpu);
+void take_interrupt_traps(CPU *cpu);
 #endif

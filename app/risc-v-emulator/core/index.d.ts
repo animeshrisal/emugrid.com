@@ -44,11 +44,14 @@ export interface RiscVRegisters {
   x31: number;
 }
 
-
+export interface UART {
+  buffer: Uint8Array;
+  clock: BigUint64Array;
+  isInterrupting: boolean;
+}
 export declare const WasmPromise: Promise<Wasm>;
 
 export default WasmPromise;
-
 
 export interface EmscriptenModule {
   _allocate_cpu(): void;

@@ -13,16 +13,27 @@
 #endif
 
 CPU *cpu_instance = NULL;
-Bus bus;
+Bus *bus_instance = NULL;
+Uart *uart_instance = NULL;
 uint8 *text_section;
 int text_size = 0;
 int pc = 0;
 int instruction_number = 0;
 int number_of_instructions = 0;
+int interrupt_count = 0;
 
-void allocate_CPU() { cpu_instance = (CPU *)malloc(sizeof(CPU)); };
+void allocate_CPU() {
+
+  bus_instance = (Bus *)malloc(sizeof(Bus));
+  uart_instance = (Uart *)malloc(sizeof(Uart));
+  cpu_instance = (CPU *)malloc(sizeof(CPU));
+
+  bus_instance->uart = uart_instance;
+  cpu_instance->bus = bus_instance;
+};
 
 CPU *get_cpu_ptr() { return cpu_instance; }
+Uart *get_uart_ptr() { return cpu_instance->bus->uart; }
 
 void free_cpu() {
   free(cpu_instance);
@@ -65,7 +76,7 @@ struct shdr read_elf_header(FILE *f) {
 };
 
 int read_elf_file(const char *elf_file) {
-  cpu_instance->bus = &bus;
+
   FILE *file = fopen(elf_file, "r");
   int quit = 0;
 
@@ -85,9 +96,23 @@ int read_elf_file(const char *elf_file) {
   return 1;
 }
 
-int handle_instruction() {
+void handle_instruction() {
   uint32 instruction = *(uint32 *)(text_section + cpu_instance->pc);
   run_instruction(cpu_instance, instruction);
+}
+
+void handle_interrupt() {
+  bool exists = check_pending_interrupts(cpu_instance);
+
+  if (exists) {
+    take_interrupt_traps(cpu_instance);
+  }
+}
+
+int main_loop() {
+  handle_instruction();
+  handle_interrupt();
+
   return cpu_instance->pc / 4;
 }
 

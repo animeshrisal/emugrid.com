@@ -9,7 +9,7 @@
 
 typedef struct Bus {
   uint64 memory[DRAM_SIZE];
-  Uart uart;
+  Uart *uart;
 } Bus;
 
 uint8 bus_read8(Bus *bus, uint64 address);

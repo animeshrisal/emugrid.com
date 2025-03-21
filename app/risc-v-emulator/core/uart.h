@@ -8,6 +8,7 @@
 #define UART_IRQ 10
 #define UART_RHR (UART_BASE + 0)
 #define UART_THR (UART_BASE + 0)
+#define UART_ISR (UART_BASE + 0)
 #define UART_LCR (UART_BASE + 3)
 #define UART_LSR (UART_BASE + 5)
 #define UART_LSR_RX 0x01;

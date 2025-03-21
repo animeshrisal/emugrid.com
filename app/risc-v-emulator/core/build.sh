@@ -11,7 +11,7 @@
 # Uncomment -s "FILESYSTEM=0" if you don't need to use fs (i.e. use it on web entirely)
 
 # if you create more dependencies of fib.cc, simply add them to the end of the below command, like: -o ./fib.js fib.cc add.cc anotherdep.cc and_so_on.cc
-emcc -O3 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='["cwrap", "ccall", "FS"]' -s -s ALLOW_MEMORY_GROWTH=1 -s SINGLE_FILE=1 -s MODULARIZE=1 -s WASM_BIGINT=1 -s 'EXPORTED_FUNCTIONS=["_read_elf_file", "_handle_instruction", "_allocate_CPU", "_get_cpu_ptr", "_free_cpu", "_show_disassembled_code"]' -s "ENVIRONMENT='web'" -o ./main.js *.c
+emcc -O3 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='["cwrap", "ccall", "FS"]' -s -s ALLOW_MEMORY_GROWTH=1 -s SINGLE_FILE=1 -s MODULARIZE=1 -s WASM_BIGINT=1 -s 'EXPORTED_FUNCTIONS=["_read_elf_file", "_handle_instruction", "_main_loop", "_allocate_CPU", "_get_cpu_ptr", "_free_cpu", "_show_disassembled_code", "_get_uart_ptr"]' -s "ENVIRONMENT='web'" -o ./main.js *.c
 
 
     # -s "FILESYSTEM=0"

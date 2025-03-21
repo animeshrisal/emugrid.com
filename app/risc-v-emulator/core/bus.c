@@ -1,8 +1,53 @@
 #include "bus.h"
 
+uint16 load_bus(Bus *bus, uint64 address, uint8 size) {
+  switch (size) {
+  case 8:
+    bus_read8(bus, address);
+    break;
+  case 16:
+    bus_read16(bus, address);
+    break;
+  case 32:
+    bus_read32(bus, address);
+    break;
+  case 64:
+    bus_read64(bus, address);
+    break;
+  default:
+    break;
+  }
+}
+
+uint16 store_bus(Bus *bus, uint64 address, uint8 size, uint64 value) {
+  switch (size) {
+  case 8:
+    bus_write8(bus, address, value);
+    break;
+  case 16:
+    bus_write16(bus, address, value);
+    break;
+  case 32:
+    bus_write32(bus, address, value);
+    break;
+  case 64:
+    bus_write64(bus, address, value);
+    break;
+  default:
+    break;
+  }
+}
+
 uint64 load(Bus *bus, uint64 address) {
-  if UART_BASE
-    <= address &&address < UART_BASE + UART_SIZE
+  if (UART_BASE <= address && address < UART_BASE + UART_SIZE) {
+    load_bus(bus, address, 32);
+  }
+}
+
+uint64 store(Bus *bus, uint64 address, uint64 value) {
+  if (UART_BASE <= address && address < UART_BASE + UART_SIZE) {
+    store_bus(bus, address, value, 32);
+  }
 }
 
 uint8 bus_read8(Bus *bus, uint64 address) {
