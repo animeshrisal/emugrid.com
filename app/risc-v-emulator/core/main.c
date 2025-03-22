@@ -23,11 +23,9 @@ int number_of_instructions = 0;
 int interrupt_count = 0;
 
 void allocate_CPU() {
-
   bus_instance = (Bus *)malloc(sizeof(Bus));
   uart_instance = (Uart *)malloc(sizeof(Uart));
   cpu_instance = (CPU *)malloc(sizeof(CPU));
-
   bus_instance->uart = uart_instance;
   cpu_instance->bus = bus_instance;
 };
@@ -102,6 +100,8 @@ void handle_instruction() {
 }
 
 void handle_interrupt() {
+  printf("%d\n", uart_instance->buffer[0]);
+  printf("%d\n", uart_instance->is_interrupting);
   bool exists = check_pending_interrupts(cpu_instance);
 
   if (exists) {

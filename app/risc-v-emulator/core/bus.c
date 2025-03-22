@@ -1,6 +1,6 @@
 #include "bus.h"
 
-uint16 load_bus(Bus *bus, uint64 address, uint8 size) {
+uint64 load_bus(Bus *bus, uint64 address, uint8 size) {
   switch (size) {
   case 8:
     bus_read8(bus, address);
@@ -19,7 +19,7 @@ uint16 load_bus(Bus *bus, uint64 address, uint8 size) {
   }
 }
 
-uint16 store_bus(Bus *bus, uint64 address, uint8 size, uint64 value) {
+void store_bus(Bus *bus, uint64 address, uint64 value, uint8 size) {
   switch (size) {
   case 8:
     bus_write8(bus, address, value);
@@ -38,15 +38,22 @@ uint16 store_bus(Bus *bus, uint64 address, uint8 size, uint64 value) {
   }
 }
 
-uint64 load(Bus *bus, uint64 address) {
-  if (UART_BASE <= address && address < UART_BASE + UART_SIZE) {
-    load_bus(bus, address, 32);
+uint64 load(Bus *bus, uint64 address, uint8 size) {
+  if (UART_BASE >= address && address < UART_BASE + UART_SIZE) {
+    printf("Got here!\n");
+    return load_bus(bus, address, 32);
+  } else {
+    return load_bus(bus, address, size);
   }
 }
 
-uint64 store(Bus *bus, uint64 address, uint64 value) {
+void store(Bus *bus, uint64 address, uint64 value, uint8 size) {
+  printf("%d", address);
   if (UART_BASE <= address && address < UART_BASE + UART_SIZE) {
+    printf("WRYYY!\n");
     store_bus(bus, address, value, 32);
+  } else {
+    store_bus(bus, address, value, size);
   }
 }
 
@@ -77,6 +84,7 @@ uint64 bus_read64(Bus *bus, uint64 address) {
 }
 
 void bus_write8(Bus *bus, uint64 address, uint8 value) {
+  printf("REEEEE!\n");
   bus->memory[address] = value;
 }
 

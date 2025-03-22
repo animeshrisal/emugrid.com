@@ -167,9 +167,9 @@ enum Mode { USER = 0x00, SUPERVISOR = 0x01, MACHINE = 0x11 };
 typedef struct CPU {
   uint64 x[32];
   uint64 pc;
+  uint32 csr[4096];
   uint64 mepc;
   uint64 sepc;
-  uint32 csr[4096];
   enum Mode mode;
   Bus *bus;
 } CPU;

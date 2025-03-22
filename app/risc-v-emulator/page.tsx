@@ -11,6 +11,9 @@ const RISC_V_REGISTER_OFFSET = 0;
 const PC_OFFSET = RISC_V_REGISTER_OFFSET + 32 * 8;
 const CSR_OFFSET = PC_OFFSET + 8;
 
+const UART_OFFSET = 0;
+const CLOCK_OFFSET = UART_OFFSET + 1 * 256;
+const IS_INTERRUPTING_OFFSET = CLOCK_OFFSET + 8;
 
 export default function Emulator() {
   const [wasm, setWasm] = useState<EmscriptenModule | undefined>(undefined);
@@ -18,18 +21,33 @@ export default function Emulator() {
   const [disassembleCode, setDisassembleCode] = useState<string[]>([]);
   const [currentInstruction, setCurrentInstruction] = useState(0);
   const runningRef = useRef<boolean>(false);
-  const [text, setText] = useState("");
-  const [uart, setUart] = useState<UART | undefined>(undefined);
+  const charRef = useRef<string>("");
+
+  const writeUart = () => {
+    if (wasm) {
+      const uart_ptr = wasm.ccall<number, void[]>('get_uart_ptr', 'number', [], []);
+
+      const upperCaseLetter = charRef.current.toUpperCase();
+      if (upperCaseLetter >= 'A' && upperCaseLetter <= 'Z') {
+        wasm.HEAP8[uart_ptr] = upperCaseLetter.charCodeAt(0) - 64;
+        wasm.HEAP8[uart_ptr + IS_INTERRUPTING_OFFSET] = 1;
+      } else {
+      }
+
+    }
+  };
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      setText((prev: string) => prev + event.key); // Append each key to the text
+      charRef.current = event.key
+      writeUart();
     };
+
 
     window.addEventListener('keydown', handleKeyPress)
 
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, []);
+  }, [writeUart]);
 
   const runEmulatorLoop = () => {
     if (!runningRef.current) return;
@@ -77,7 +95,7 @@ export default function Emulator() {
   function readUart(ptr: number): UART | undefined {
     if (wasm) {
       for (let i = 0; i < 100; i++) {
-        wasm.HEAPU8[(ptr) + i] = 'a';
+        wasm.HEAPU8[(ptr) + i] = 1;
       }
     } else {
       return undefined;
@@ -111,7 +129,6 @@ export default function Emulator() {
         .filter((instr: string) => instr.trim() !== '');
 
       setDisassembleCode(disassembleC)
-
     };
 
     reader.readAsArrayBuffer(file);
@@ -130,8 +147,6 @@ export default function Emulator() {
     const _cpu = readCPU(cpu_ptr);
     const _uart = readUart(uart_ptr);
     setCPU(_cpu);
-    setUart(_uart);
-
   }
 
   const Registers = () => {
@@ -151,7 +166,6 @@ export default function Emulator() {
     }
   }
 
-
   return (
     <div>
       <h1>Risc V - Emulator</h1>
@@ -167,7 +181,7 @@ export default function Emulator() {
         <Registers />
         <Uart />
 
-        <div id="inputBuffer" className={styles['hide']}>{text}</div>
+        <div id="inputBuffer" className={styles['hide']}>{charRef.current}</div>
         <InstructionList instructions={disassembleCode} current={currentInstruction} />
       </div>
     </div >

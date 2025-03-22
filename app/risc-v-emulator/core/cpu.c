@@ -199,19 +199,19 @@ void run_l_instructions(CPU *cpu, uint32 instr) {
 
   switch (func3) {
   case LB:
-    regs[rd] = (int8)bus_read8(cpu->bus, addr); // Load Byte, sign-extended
+    regs[rd] = load(cpu->bus, imm, 8);
     break;
   case LH:
-    regs[rd] = (int16)bus_read16(cpu->bus, addr); // Load Half, sign-extended
+    regs[rd] = load(cpu->bus, imm, 16);
     break;
   case LW:
-    regs[rd] = (int32)bus_read32(cpu->bus, addr); // Load Word, sign-extended
+    regs[rd] = load(cpu->bus, imm, 32);
     break;
   case LBU:
-    regs[rd] = bus_read8(cpu->bus, addr); // Load Byte, zero-extended
+    regs[rd] = load(cpu->bus, imm, 32);
     break;
   case LHU:
-    regs[rd] = bus_read16(cpu->bus, addr); // Load Half, zero-extended
+    regs[rd] = load(cpu->bus, imm, 32);
     break;
   default:
     printf("Illegal load instruction\n");
@@ -237,13 +237,13 @@ void run_s_instructions(CPU *cpu, uint32 instr) {
 
   switch (func3) {
   case SB:
-    bus_write8(cpu->bus, addr, (uint8)value); // Store Byte
+    store(cpu->bus, addr, value, 8);
     break;
   case SH:
-    bus_write16(cpu->bus, addr, (uint16)value); // Store Half
+    store(cpu->bus, addr, value, 16);
     break;
   case SW:
-    bus_write32(cpu->bus, addr, (uint32)value); // Store Word
+    store(cpu->bus, addr, value, 32);
     break;
   default:
     printf("Illegal store instruction\n");
@@ -254,8 +254,8 @@ void run_s_instructions(CPU *cpu, uint32 instr) {
 void run_u_instructions(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7F;
   int rd = rd(instr);
-  int32 imm = instr & 0xFFFFF000; // Upper 20 bits for U-type immediate
-
+  printf("\n%d\n", instr & 0xFFFF000);
+  int32 imm = (uint64)(int64)(int32)(instr & 0xFFFFF000);
   uint64 *regs = cpu->x;
 
   switch (opcode) {
@@ -463,6 +463,7 @@ bool check_pending_interrupts(CPU *cpu) {
   }
 
   if (cpu->bus->uart->is_interrupting) {
+    printf("UART is interrupting\n");
     irq = UART_IRQ;
   }
 }

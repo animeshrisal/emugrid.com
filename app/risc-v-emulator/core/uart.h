@@ -17,7 +17,7 @@
 typedef struct {
   uint8 buffer[UART_SIZE];
   uint64 clock;
-  bool is_interrupting;
+  uint8 is_interrupting;
 } Uart;
 
 bool uart_is_interrupting(Uart *uart);

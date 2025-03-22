@@ -12,11 +12,15 @@ typedef struct Bus {
   Uart *uart;
 } Bus;
 
+uint64 load(Bus *bus, uint64 address, uint8 size);
+uint64 load_bus(Bus *bus, uint64 address, uint8 size);
 uint8 bus_read8(Bus *bus, uint64 address);
 uint16 bus_read16(Bus *bus, uint64 address);
 uint32 bus_read32(Bus *bus, uint64 address);
 uint64 bus_read64(Bus *bus, uint64 address);
 
+void store(Bus *bus, uint64 address, uint64 value, uint8 size);
+void store_bus(Bus *bus, uint64 address, uint64 value, uint8 size);
 void bus_write8(Bus *bus, uint64 addr, uint8 value);
 void bus_write16(Bus *bus, uint64 addr, uint16 value);
 void bus_write32(Bus *bus, uint64 addr, uint32 value);
