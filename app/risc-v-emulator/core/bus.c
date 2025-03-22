@@ -49,9 +49,7 @@ uint64 load(Bus *bus, uint64 address, uint8 size) {
 
 void store(Bus *bus, uint64 address, uint64 value, uint8 size) {
   printf("%d", address);
-  if (UART_BASE <= address && address < UART_BASE + UART_SIZE) {
-    printf("WRYYY!\n");
-    store_bus(bus, address, value, 32);
+  if (UART_BASE >= address && address < UART_BASE + UART_SIZE) {
   } else {
     store_bus(bus, address, value, size);
   }
