@@ -1,4 +1,5 @@
 #include "bus.h"
+#include "uart.h"
 
 uint64 load_bus(Bus *bus, uint64 address, uint8 size) {
   switch (size) {
@@ -41,15 +42,15 @@ void store_bus(Bus *bus, uint64 address, uint64 value, uint8 size) {
 uint64 load(Bus *bus, uint64 address, uint8 size) {
   if (UART_BASE >= address && address < UART_BASE + UART_SIZE) {
     printf("Got here!\n");
-    return load_bus(bus, address, 32);
+    return uart_load(bus->uart, address);
   } else {
     return load_bus(bus, address, size);
   }
 }
 
 void store(Bus *bus, uint64 address, uint64 value, uint8 size) {
-  printf("%d", address);
   if (UART_BASE >= address && address < UART_BASE + UART_SIZE) {
+    uart_store(bus->uart, address, value);
   } else {
     store_bus(bus, address, value, size);
   }
@@ -82,7 +83,6 @@ uint64 bus_read64(Bus *bus, uint64 address) {
 }
 
 void bus_write8(Bus *bus, uint64 address, uint8 value) {
-  printf("REEEEE!\n");
   bus->memory[address] = value;
 }
 

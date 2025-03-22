@@ -1,3 +1,5 @@
+#ifndef UART_H
+#define UART_H
 #include "types.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,3 +25,4 @@ typedef struct {
 bool uart_is_interrupting(Uart *uart);
 uint64 uart_load(Uart *uart, uint64 addr);
 void uart_store(Uart *uart, uint64 addr, uint64 value);
+#endif

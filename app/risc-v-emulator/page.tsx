@@ -181,7 +181,7 @@ export default function Emulator() {
         <Registers />
         <Uart />
 
-        <div id="inputBuffer" className={styles['hide']}>{charRef.current}</div>
+        <div id="output"></div>
         <InstructionList instructions={disassembleCode} current={currentInstruction} />
       </div>
     </div >
