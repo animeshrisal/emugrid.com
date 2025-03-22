@@ -40,6 +40,9 @@ _start:
     li a1, 10              # Newline (ASCII 10)
     sb a1, 0(a2)
 
+    li a7, 93
+    ecall
+
 loop:
   addi x1, x1, 4
   bne x1, x2, loop
