@@ -2,6 +2,8 @@
     .globl _start
 
 _start:
+  la t0, 0x00000000
+  csrw mstatus, t0
   la t0, print
   csrw mtvec, t0
   ecall

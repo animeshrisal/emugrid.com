@@ -186,7 +186,6 @@ char *disassemble_instruction(uint32 instr) {
     break;
 
   case CSR:
-
     switch (func3) {
     case CSRRW:
       sprintf(output, "csrrw x%d, %d, x%d", rd, csr, rs1);
@@ -206,12 +205,7 @@ char *disassemble_instruction(uint32 instr) {
     case CSRRCI:
       sprintf(output, "csrrci x%d, %d, %d", rd, csr, rs1 & 0x1F);
       break;
-    case MRET:
-      sprintf(output, "mret");
-      break;
-    case SRET:
-      sprintf(output, "sret");
-      break;
+
     case 0:
       sprintf(output, "ecall");
     default:
@@ -219,7 +213,12 @@ char *disassemble_instruction(uint32 instr) {
       break;
     }
     break;
-
+  case MRET:
+    sprintf(output, "mret");
+    break;
+  case SRET:
+    sprintf(output, "sret");
+    break;
   default:
     sprintf(output, "Unknown instruction");
     break;

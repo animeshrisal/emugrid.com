@@ -378,9 +378,8 @@ void write_sstatus(CPU *cpu, uint64 value, uint64 shift) {
 }
 
 void run_mret_instruction(CPU *cpu) {
-  printf("Mret \n");
   cpu->pc = (uint64)(load_csr(cpu, MEPC));
-  uint64 mode = read_mstatus(cpu, MSTATUS_MPP);
+  cpu->mode = read_mstatus(cpu, MSTATUS_MPP);
 }
 
 void run_sret_instruction(CPU *cpu) {
