@@ -5,6 +5,7 @@ _start:
   la t0, print
   csrw mtvec, t0
   ecall
+  j loop
 
 print:
     li a2, 0x10000000 #Address of uart

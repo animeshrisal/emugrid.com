@@ -93,7 +93,6 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
     imm |= 0xFFFFF000;
   }
 
-  printf("%d", func3);
   uint64 *regs = cpu->x;
   switch (func3) {
   case ADD:
@@ -277,15 +276,24 @@ void store_csr(CPU *cpu, uint32 address, uint64 value) {
   cpu->csr[address] = value;
 }
 
-void run_ecall_instruction(CPU *cpu) { cpu->exception = CAUSE_USER_ECALL; }
+void run_ecall_instruction(CPU *cpu) {
+  cpu->exception = CAUSE_USER_ECALL;
+  take_trap(cpu);
+}
 
 void exec_jal(CPU *cpu, uint32 instr) {
-  int32 imm = ((instr & 0x80000000) ? 0xFFF00000 : 0) |
-              ((instr >> 21) & 0x3FF) | ((instr >> 20) & 0x1) << 10 |
-              ((instr >> 12) & 0xFF) << 11;
+  uint64 imm = (((int32)(instr & 0x80000000) >> 11) &
+                0xFFFFF000) |           // imm[20] (sign-extended)
+               (instr & 0xFF000) |      // imm[19:12]
+               ((instr >> 9) & 0x800) | // imm[11]
+               ((instr >> 20) & 0x7FE); // imm[10:1]
+                                        // Bits 19:12
+
   int rd = rd(instr);
-  cpu->x[rd] = cpu->pc;
-  cpu->pc = cpu->pc + (int64)imm - 4;
+
+  cpu->x[rd] = cpu->pc + 4;
+
+  cpu->pc = cpu->pc + (int64)imm;
 }
 
 void exec_jalr(CPU *cpu, uint32 instr) {
@@ -336,7 +344,13 @@ void run_instruction(CPU *cpu, uint32 instr) {
     run_u_instructions(cpu, instr);
     break;
   case CSR:
-    run_csr_instructions(cpu, instr);
+    if (instr == MRET) {
+      run_mret_instruction(cpu);
+    } else if (instr == SRET) {
+      run_sret_instruction(cpu);
+    } else {
+      run_csr_instructions(cpu, instr);
+    }
     break;
   case JAL:
   case JALR:
@@ -364,8 +378,9 @@ void write_sstatus(CPU *cpu, uint64 value, uint64 shift) {
 }
 
 void run_mret_instruction(CPU *cpu) {
+  printf("Mret \n");
   cpu->pc = (uint64)(load_csr(cpu, MEPC));
-  cpu->mode = read_mstatus(cpu, MSTATUS_MPP);
+  uint64 mode = read_mstatus(cpu, MSTATUS_MPP);
 }
 
 void run_sret_instruction(CPU *cpu) {
@@ -381,7 +396,7 @@ void take_trap(CPU *cpu) {
   if (prev_mode == SUPERVISOR && ((load_csr(cpu, MEDELEG) >> cause) & 1) == 1) {
     cpu->pc = (uint64)(load_csr(cpu, STVEC) & !1);
     cpu->mode = SUPERVISOR;
-    store_csr(cpu, SEPC, exception_pc & !1);
+    store_csr(cpu, SEPC, exception_pc);
     store_csr(cpu, SCAUSE, cause);
     store_csr(cpu, STVAL, 0);
 
@@ -394,11 +409,11 @@ void take_trap(CPU *cpu) {
       write_sstatus(cpu, SUPERVISOR, MSTATUS_SPP_SHIFT);
       break;
     default:
-      printf("Previous privilege mode is invalid");
+      printf("Previous privilege mode is invalid\n");
     }
   } else {
     cpu->mode = MACHINE;
-    cpu->pc = (uint64)(load_csr(cpu, MTVEC));
+    cpu->pc = (uint64)(load_csr(cpu, MTVEC))-4;
     store_csr(cpu, MEPC, exception_pc);
     store_csr(cpu, MCAUSE, cause);
     store_csr(cpu, MTVAL, 0);
@@ -414,7 +429,7 @@ void take_trap(CPU *cpu) {
       write_sstatus(cpu, MACHINE, MSTATUS_MPP_SHIFT);
       break;
     default:
-      printf("Previous privilege mode is invalid");
+      printf("Previous privilege mode is invalid\n");
     }
   }
 }
@@ -430,7 +445,9 @@ void run_csr_instructions(CPU *cpu, uint32 instr) {
   uint32 csr_value = cpu->csr[csr];
 
   if (func3 == 0) {
+
     run_ecall_instruction(cpu);
+
   } else {
     switch (func3) {
     case CSRRW:

@@ -112,8 +112,8 @@
 #define SIP 0x144
 #define SATP 0x180
 
-#define MRET 0b0011000
-#define SRET 0b0001000
+#define MRET 0x30200073
+#define SRET 0x10200073
 
 #include "bus.h"
 
@@ -141,9 +141,12 @@ void run_b_instructions(CPU *cpu, uint32 instr);
 void run_j_instructions(CPU *cpu, uint32 instr);
 void run_csr_instructions(CPU *cpu, uint32 instr);
 void run_priviledge_mode(CPU *cpu, uint32 instr);
-void run_ecall_instructions(CPU *cpiu, uint32 instr);
+void run_ecall_instructions(CPU *cpu, uint32 instr);
+void take_trap(CPU *cpu);
 uint32 cpu_fetch_instruction(Bus *bus);
 uint64 load_csr(CPU *cpu, uint32 address);
 void store_csr(CPU *cpu, uint32 address, uint64 value);
 void take_trap(CPU *cpu);
+void run_mret_instruction(CPU *cpu);
+void run_sret_instruction(CPU *cpu);
 #endif

@@ -170,6 +170,21 @@ char *disassemble_instruction(uint32 instr) {
     sprintf(output, "auipc x%d, %d", rd, imm);
     break;
 
+  case JAL:
+    imm = (((int32)(instr & 0x80000000) >> 11) &
+           0xFFFFF000) |           // imm[20] (sign-extended)
+          (instr & 0xFF000) |      // imm[19:12]
+          ((instr >> 9) & 0x800) | // imm[11]
+          ((instr >> 20) & 0x7FE); // imm[10:1]
+                                   // Bits 19:12
+
+    sprintf(output, "jal x%d, %d", rd, imm);
+    break;
+
+  case JALR:
+    sprintf(output, "jalr x%d, x%d, %d", rd, rs1, imm);
+    break;
+
   case CSR:
 
     switch (func3) {
