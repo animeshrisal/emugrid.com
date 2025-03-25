@@ -2,6 +2,10 @@
     .globl _start
 
 _start:
+  csrw mtvec print
+  ecall
+
+print:
     li a2, 0x10000000 #Address of uart
     li a1, 'H'             # Character 'H'
     sb a1, 0(a2)
@@ -36,10 +40,9 @@ _start:
     li a1, 'd'             # Character 'd'
     sb a1, 0(a2)
 
-    # Optional: Add a newline character
-    li a1, 10              # Newline (ASCII 10)
+    li a1, 10              
     sb a1, 0(a2)
 
 loop:
   addi x1, x1, 4
-  bne x1, x2, loop
+  bne x1, x2, loo

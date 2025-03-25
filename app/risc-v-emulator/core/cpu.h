@@ -1,7 +1,6 @@
 #ifndef CPU_H
 #define CPU_H
 
-/* Exception Causes */
 #define CAUSE_MISALIGNED_FETCH 0x0
 #define CAUSE_FAULT_FETCH 0x1
 #define CAUSE_ILLEGAL_INSTRUCTION 0x2
@@ -19,50 +18,8 @@
 #define CAUSE_STORE_PAGE_FAULT 0xF
 #define CAUSE_INTERRUPT ((uint32)1 << 31)
 
-/* misa CSR */
-#define MCPUID_A (1 << ('A' - 'A'))
-#define MCPUID_C (1 << ('C' - 'A'))
-#define MCPUID_D (1 << ('D' - 'A'))
-#define MCPUID_F (1 << ('F' - 'A'))
-#define MCPUID_I (1 << ('I' - 'A'))
-#define MCPUID_M (1 << ('M' - 'A'))
-#define MCPUID_Q (1 << ('Q' - 'A'))
-#define MCPUID_SUPER (1 << ('S' - 'A'))
-#define MCPUID_USER (1 << ('U' - 'A'))
-
-/* mstatus CSR */
-#define MSTATUS_UIE (1 << 0)
-#define MSTATUS_SIE (1 << 1)
-#define MSTATUS_HIE (1 << 2)
-#define MSTATUS_MIE (1 << 3)
-#define MSTATUS_UPIE (1 << 4)
-#define MSTATUS_SPIE (1 << MSTATUS_SPIE_SHIFT)
-#define MSTATUS_HPIE (1 << 6)
-#define MSTATUS_MPIE (1 << MSTATUS_MPIE_SHIFT)
-#define MSTATUS_SPP (1 << MSTATUS_SPP_SHIFT)
-#define MSTATUS_HPP (3 << 9)
-#define MSTATUS_MPP (3 << MSTATUS_MPP_SHIFT)
-#define MSTATUS_FS (3 << MSTATUS_FS_SHIFT)
-#define MSTATUS_XS (3 << 15)
-#define MSTATUS_MPRV (1 << 17)
-#define MSTATUS_SUM (1 << 18)
-#define MSTATUS_MXR (1 << 19)
-#define MSTATUS_UXL_MASK ((uint64)3 << MSTATUS_UXL_SHIFT)
-#define MSTATUS_SXL_MASK ((uint64)3 << MSTATUS_SXL_SHIFT)
-
-/* SSTATUS Masks */
-#define SSTATUS_MASK0                                                          \
-  (MSTATUS_UIE | MSTATUS_SIE | MSTATUS_UPIE | MSTATUS_SPIE | MSTATUS_SPP |     \
-   MSTATUS_FS | MSTATUS_XS | MSTATUS_SUM | MSTATUS_MXR)
-#define SSTATUS_MASK SSTATUS_MASK0
-
-#define MSTATUS_MASK                                                           \
-  (MSTATUS_UIE | MSTATUS_SIE | MSTATUS_MIE | MSTATUS_UPIE | MSTATUS_SPIE |     \
-   MSTATUS_MPIE | MSTATUS_SPP | MSTATUS_MPP | MSTATUS_FS | MSTATUS_MPRV |      \
-   MSTATUS_SUM | MSTATUS_MXR)
-
-/* Counter Enable Masks */
-#define COUNTEREN_MASK ((1 << 0) | (1 << 2))
+#define MSTATUS_SPP (3 << 11)
+#define MSTATUS_MPP (1 << 8)
 
 /* Instruction Types */
 #define R 0b0110011
@@ -75,6 +32,7 @@
 #define LUI 0b0110111
 #define AUI 0b0010111
 #define CSR 0b1110011
+#define ECALL 0b1110011
 #define FENCE 0b0001111
 
 /* Operation Codes */
@@ -155,11 +113,6 @@
 #define MRET 0b0011000
 #define SRET 0b0001000
 
-#define MPIE_BIT 7
-#define MIE_BIT 3
-#define SPIE_BIT 5
-#define SIE_BIT 1
-
 #include "bus.h"
 
 enum Mode { USER = 0x00, SUPERVISOR = 0x01, MACHINE = 0x11 };
@@ -172,6 +125,7 @@ typedef struct CPU {
   uint64 sepc;
   enum Mode mode;
   Bus *bus;
+  uint64 exception;
 } CPU;
 
 void create_cpu(CPU *cpu);
@@ -185,7 +139,9 @@ void run_b_instructions(CPU *cpu, uint32 instr);
 void run_j_instructions(CPU *cpu, uint32 instr);
 void run_csr_instructions(CPU *cpu, uint32 instr);
 void run_priviledge_mode(CPU *cpu, uint32 instr);
+void run_ecall_instructions(CPU *cpiu, uint32 instr);
 uint32 cpu_fetch_instruction(Bus *bus);
-bool check_pending_interrupts(CPU *cpu);
-void take_interrupt_traps(CPU *cpu);
+uint64 load_csr(CPU *cpu, uint32 address);
+void store_csr(CPU *cpu, uint32 address, uint64 value);
+void take_trap(CPU *cpu);
 #endif

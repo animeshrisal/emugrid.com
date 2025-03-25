@@ -1,11 +1,10 @@
 OUTPUT_ARCH( "riscv" )
-ENTRY( _entry )
+ENTRY( _start )
 
 SECTIONS
 {
 
-  . = 0x0;
-
-
+  . = 0x80000000;
+  .text : { *(.text) }
   PROVIDE(end = .);
 }

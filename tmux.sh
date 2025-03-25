@@ -13,7 +13,7 @@ tmux send-keys "lazygit" C-m
 
     # Window 3: Command Line 1 (same folder)
     tmux new-window -t $SESSION_NAME -n "cmd1" -c "$PROJECT_PATH"
-
+    tmux send-keys "pnpm run dev" C-m
     # Window 5: Core folder
     tmux new-window -t $SESSION_NAME -n "core" -c "$PROJECT_PATH/app/risc-v-emulator/core"
 

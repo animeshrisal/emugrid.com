@@ -99,19 +99,8 @@ void handle_instruction() {
   run_instruction(cpu_instance, instruction);
 }
 
-void handle_interrupt() {
-  printf("%d\n", uart_instance->buffer[0]);
-  printf("%d\n", uart_instance->is_interrupting);
-  bool exists = check_pending_interrupts(cpu_instance);
-
-  if (exists) {
-    take_interrupt_traps(cpu_instance);
-  }
-}
-
 int main_loop() {
   handle_instruction();
-  handle_interrupt();
 
   return cpu_instance->pc / 4;
 }

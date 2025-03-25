@@ -254,7 +254,6 @@ void run_s_instructions(CPU *cpu, uint32 instr) {
 void run_u_instructions(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7F;
   int rd = rd(instr);
-  printf("\n%d\n", instr & 0xFFFF000);
   int32 imm = (uint64)(int64)(int32)(instr & 0xFFFFF000);
   uint64 *regs = cpu->x;
 
@@ -277,102 +276,58 @@ void store_csr(CPU *cpu, uint32 address, uint64 value) {
   cpu->csr[address] = value;
 }
 
-void run_privileged_mode(CPU *cpu, uint32 instr) {
-  int opcode = instr & 0x7f;
-  int priv = (instr >> 25) & 0x7f; // Correct masking and shifting
-
-  switch (priv) {
-  case MRET:
-    cpu->pc = cpu->mepc;
-
-    unsigned int mstatus = load_csr(cpu, MSTATUS);
-
-    if ((mstatus >> MPIE_BIT) & 1) {
-      mstatus |= (1 << MIE_BIT);
-    } else {
-      mstatus &= ~(1 << MIE_BIT);
-    }
-
-    mstatus |= (1 << MPIE_BIT);
-
-    mstatus &= ~(0b11 << 11);
-
-    store_csr(cpu, MSTATUS, mstatus);
-    cpu->mode = (mstatus >> 11) & 0b11;
-    break;
-
-  case SRET:
-    cpu->pc = cpu->sepc;
-    unsigned int sstatus = load_csr(cpu, (uint8)SSTATUS);
-
-    if ((sstatus >> SPIE_BIT) & 1) {
-      sstatus |= (1 << SIE_BIT);
-    } else {
-      sstatus &= ~(1 << SIE_BIT);
-    }
-
-    sstatus |= (1 << SPIE_BIT);
-
-    sstatus &= ~(1 << 8);
-
-    store_csr(cpu, SSTATUS, sstatus);
-    cpu->mode = (sstatus >> 8) & 1 ? SUPERVISOR : USER;
-    break;
-
-  default:
-    printf("Illegal privilege instruction\n");
-    break;
-  }
-}
+void run_ecall_instruction(CPU *cpu) { cpu->exception = CAUSE_USER_ECALL; }
 
 void run_csr_instructions(CPU *cpu, uint32 instr) {
 
   int opcode = instr & 0x7f;
   int rd = rd(instr);
   int rs1 = rs1(instr);
+  int func3 = (instr >> 12) & 0x7;
   int csr = (instr >> 20) & 0xFFF;
   uint32 rs1_value = cpu->x[rs1];
   uint32 csr_value = cpu->csr[csr];
 
-  switch (opcode) {
-  case CSRRW:
-    cpu->x[rd] = csr_value;
-    cpu->csr[csr] = rs1_value;
-    break;
+  if (func3 == 0) {
+    run_ecall_instruction(cpu);
+  } else {
+    switch (opcode) {
+    case CSRRW:
+      cpu->x[rd] = csr_value;
+      cpu->csr[csr] = rs1_value;
+      break;
 
-  case CSRRS:
-    cpu->x[rd] = csr_value;
-    cpu->csr[csr] |= rs1_value;
-    break;
-  case CSRRC:
-    cpu->x[rd] = csr_value;
-    cpu->csr[csr] &= ~rs1_value;
-    break;
-  case CSRRWI:
-    cpu->x[rd] = csr_value;
-    cpu->csr[csr] = rs1 & 0x1F;
-    break;
-  case CSRRSI:
-    cpu->x[rd] = csr_value;
-    cpu->csr[csr] |= rs1 & 0x1F;
-    break;
-  case CSRRCI:
-    cpu->x[rd] = csr_value;
-    cpu->csr[csr] &= ~(rs1 & 0x1F);
-    break;
+    case CSRRS:
+      cpu->x[rd] = csr_value;
+      cpu->csr[csr] |= rs1_value;
+      break;
+    case CSRRC:
+      cpu->x[rd] = csr_value;
+      cpu->csr[csr] &= ~rs1_value;
+      break;
+    case CSRRWI:
+      cpu->x[rd] = csr_value;
+      cpu->csr[csr] = rs1 & 0x1F;
+      break;
+    case CSRRSI:
+      cpu->x[rd] = csr_value;
+      cpu->csr[csr] |= rs1 & 0x1F;
+      break;
+    case CSRRCI:
+      cpu->x[rd] = csr_value;
+      cpu->csr[csr] &= ~(rs1 & 0x1F);
+      break;
 
-  default:
-    break;
+    default:
+      break;
+    }
   }
 }
 
 void exec_jal(CPU *cpu, uint32 instr) {
-  int32 imm =
-      ((instr & 0x80000000) ? 0xFFF00000 : 0) | // imm[20] (sign extension)
-      ((instr >> 21) & 0x3FF) |                 // imm[10:1]
-      ((instr >> 20) & 0x1) << 10 |             // imm[11]
-      ((instr >> 12) & 0xFF) << 11;             // imm[19:12]
-
+  int32 imm = ((instr & 0x80000000) ? 0xFFF00000 : 0) |
+              ((instr >> 21) & 0x3FF) | ((instr >> 20) & 0x1) << 10 |
+              ((instr >> 12) & 0xFF) << 11;
   int rd = rd(instr);
   cpu->x[rd] = cpu->pc;
   cpu->pc = cpu->pc + (int64)imm - 4;
@@ -443,63 +398,60 @@ void run_instruction(CPU *cpu, uint32 instr) {
   }
 }
 
-bool check_pending_interrupts(CPU *cpu) {
+uint64 read_mstatus(CPU *cpu) { return load_csr(cpu, MSTATUS); }
 
-  int irq;
-  switch (cpu->mode) {
-  case SUPERVISOR:
-    if ((load_csr(cpu, MSTATUS) >> 3) & 1 == 0) {
-      return false;
-    }
-    break;
-  case MACHINE:
-    if ((load_csr(cpu, MSTATUS) >> 1) & 1 == 0) {
-      return false;
-    }
-    break;
-  default:
-    printf("Illegal instruction!");
-    break;
-  }
-
-  if (cpu->bus->uart->is_interrupting) {
-    printf("UART is interrupting\n");
-    irq = UART_IRQ;
-  }
+void write_mstatus(CPU *cpu, uint64 value, uint64 shift) {
+  uint64 old_mstatus = load_csr(cpu, MSTATUS) | shift;
 }
 
-void take_interrupt_trap(CPU *cpu) {
+uint64 read_sstatus(CPU *cpu) { return load_csr(cpu, SSTATUS); }
+
+void write_sstatus(CPU *cpu, uint64 value, uint64 shift) {
+  uint64 sstatus = load_csr(cpu, SSTATUS) | shift;
+}
+
+void take_trap(CPU *cpu) {
   int exception_pc = cpu->pc;
   int prev_mode = cpu->mode;
-  int cause;
-}
+  int cause = cpu->exception;
 
-void take_trap(CPU *cpu, int cause) {
-  int prev_mode = cpu->mode;
-  int exception_pc = cpu->pc + 4;
+  if (prev_mode == SUPERVISOR && ((load_csr(cpu, MEDELEG) >> cause) & 1) == 1) {
+    cpu->pc = (uint64)(load_csr(cpu, STVEC) & !1);
+    cpu->mode = SUPERVISOR;
+    store_csr(cpu, SEPC, exception_pc & !1);
+    store_csr(cpu, SCAUSE, cause);
+    store_csr(cpu, STVAL, 0);
 
-  unsigned int mstatus = load_csr(cpu, MSTATUS);
-  if (prev_mode == SUPERVISOR) {
-    // to do
+    switch (prev_mode) {
+
+    case USER:
+      write_sstatus(cpu, USER, MSTATUS_SPP);
+      break;
+    case SUPERVISOR:
+      write_sstatus(cpu, SUPERVISOR, MSTATUS_SPP);
+      break;
+    default:
+      printf("Previous privilege mode is invalid");
+    }
   } else {
     cpu->mode = MACHINE;
-    cpu->pc = load_csr(cpu, MTVEC) & !1;
-
+    cpu->pc = (uint64)(load_csr(cpu, MTVEC) & !1);
     store_csr(cpu, MEPC, exception_pc & !1);
     store_csr(cpu, MCAUSE, cause);
-    store_csr(cpu, MTVAL, 0);
+    store_csr(cpu, MTVAL, 1);
 
-    if ((mstatus >> MPIE_BIT) & 1) {
-      mstatus |= (1 << MIE_BIT);
-    } else {
-      mstatus &= ~(1 << MIE_BIT);
+    switch (prev_mode) {
+    case USER:
+      write_sstatus(cpu, USER, MSTATUS_MPP);
+      break;
+    case SUPERVISOR:
+      write_sstatus(cpu, SUPERVISOR, MSTATUS_MPP);
+      break;
+    case MACHINE:
+      write_sstatus(cpu, MACHINE, MSTATUS_MPP);
+      break;
+    default:
+      printf("Previous privilege mode is invalid");
     }
-
-    store_csr(cpu, MSTATUS, mstatus & !(1 << 3));
-    store_csr(cpu, MSTATUS, mstatus & !(0b11 << 11));
   }
 }
-
-void run_ecall() {}
-
-void take_interrupt_traps(CPU *cpu) {}
