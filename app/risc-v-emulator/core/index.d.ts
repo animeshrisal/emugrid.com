@@ -2,10 +2,20 @@ export interface Wasm {
   _fib(a: number): number;
 }
 
+export enum Mode {
+  USER = 0x00,
+  SUPERVISOR = 0x01,
+  MACHINE = 0x11
+}
+
 export interface CPU {
   riscv_register: BigInt64Array; // 64-bit integer registers
   pc: bigint;                    // 64-bit integer for program counter
   csr: Uint32Array;              // 32-bit integer CSR array
+  mepc: uint64;
+  sepc: uint64;
+  exception: uint64;
+  mode: string;
   bus: number | null;            // Pointer to Bus (null if not used)
 }
 

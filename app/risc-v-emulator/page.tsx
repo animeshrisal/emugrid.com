@@ -10,6 +10,10 @@ import Uart from './components/Uart';
 const RISC_V_REGISTER_OFFSET = 0;
 const PC_OFFSET = RISC_V_REGISTER_OFFSET + 32 * 8;
 const CSR_OFFSET = PC_OFFSET + 8;
+const MEPC_OFFSET = CSR_OFFSET + 4096 * 4;
+const SEPC_OFFSET = MEPC_OFFSET + 8;
+const EXCEPTION_OFFSET = SEPC_OFFSET + 8;
+const MODE_OFFSET = EXCEPTION_OFFSET + 8;
 
 const UART_OFFSET = 0;
 const CLOCK_OFFSET = UART_OFFSET + 1 * 256;
@@ -79,12 +83,27 @@ export default function Emulator() {
         csr[i] = wasm.HEAPU32[(ptr + CSR_OFFSET) / 4 + i];
       }
 
+      const mepc = wasm.HEAPU64[(ptr + MEPC_OFFSET) / 8];
+      const sepc = wasm.HEAPU64[(ptr + SEPC_OFFSET) / 8];
+      const exception = wasm.HEAPU64[(ptr + EXCEPTION_OFFSET) / 8];
+      const modeValue = wasm.HEAPU8[ptr + MODE_OFFSET];
+      const mode = modeValue === 0x00
+        ? "USER"
+        : modeValue === 0x01
+          ? "SUPERVISOR"
+          : "MACHINE";
+
       const bus = null;
 
+      console.log(mode);
       return {
         riscv_register,
         pc,
         csr,
+        mepc,
+        sepc,
+        exception,
+        mode,
         bus
       };
     } else {
@@ -182,6 +201,7 @@ export default function Emulator() {
         <Uart />
 
         <div id="output"></div>
+        <div>{}</div>
         <InstructionList instructions={disassembleCode} current={currentInstruction} />
       </div>
     </div >

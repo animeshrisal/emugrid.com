@@ -96,12 +96,12 @@ int read_elf_file(const char *elf_file) {
 
 void handle_instruction() {
   uint32 instruction = *(uint32 *)(text_section + cpu_instance->pc);
+
   run_instruction(cpu_instance, instruction);
 }
 
 int main_loop() {
   handle_instruction();
-
   return cpu_instance->pc / 4;
 }
 

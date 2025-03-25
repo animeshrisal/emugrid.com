@@ -18,8 +18,10 @@
 #define CAUSE_STORE_PAGE_FAULT 0xF
 #define CAUSE_INTERRUPT ((uint32)1 << 31)
 
-#define MSTATUS_SPP (3 << 11)
-#define MSTATUS_MPP (1 << 8)
+#define MSTATUS_SPP 11
+#define MSTATUS_MPP 8
+#define MSTATUS_SPP_SHIFT (3 << MSTATUS_SPP)
+#define MSTATUS_MPP_SHIFT (1 << MSTATUS_MPP)
 
 /* Instruction Types */
 #define R 0b0110011
@@ -69,12 +71,12 @@
 #define LHU 0x5
 
 /* CSR Instructions */
-#define CSRRW 0x0
-#define CSRRS 0x1
-#define CSRRC 0x2
-#define CSRRWI 0x3
-#define CSRRSI 0x4
-#define CSRRCI 0x5
+#define CSRRW 0x1
+#define CSRRS 0x2
+#define CSRRC 0x3
+#define CSRRWI 0x4
+#define CSRRSI 0x5
+#define CSRRCI 0x6
 
 /* Registers */
 #define rd(v) ((v >> 7) & 0x1f)
@@ -123,9 +125,9 @@ typedef struct CPU {
   uint32 csr[4096];
   uint64 mepc;
   uint64 sepc;
+  uint64 exception;
   enum Mode mode;
   Bus *bus;
-  uint64 exception;
 } CPU;
 
 void create_cpu(CPU *cpu);

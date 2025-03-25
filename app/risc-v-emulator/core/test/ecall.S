@@ -2,7 +2,8 @@
     .globl _start
 
 _start:
-  csrw mtvec print
+  la t0, print
+  csrw mtvec, t0
   ecall
 
 print:
@@ -43,6 +44,8 @@ print:
     li a1, 10              
     sb a1, 0(a2)
 
+    mret
+
 loop:
   addi x1, x1, 4
-  bne x1, x2, loo
+  bne x1, x2, loop

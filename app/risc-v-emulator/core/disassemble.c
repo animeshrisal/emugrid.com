@@ -12,7 +12,7 @@ char *disassemble_instruction(uint32 instr) {
   int rs1 = rs1(instr);
   int rs2 = rs2(instr);
   int32 imm = (int32)(instr >> 20);
-
+  int csr = (instr >> 20) & 0xFFF;
   if (imm & 0x800) {
     imm |= 0xFFFFF000;
   }
@@ -168,6 +168,41 @@ char *disassemble_instruction(uint32 instr) {
 
   case AUI:
     sprintf(output, "auipc x%d, %d", rd, imm);
+    break;
+
+  case CSR:
+
+    switch (func3) {
+    case CSRRW:
+      sprintf(output, "csrrw x%d, %d, x%d", rd, csr, rs1);
+      break;
+    case CSRRS:
+      sprintf(output, "csrrs x%d, %d, x%d", rd, csr, rs1);
+      break;
+    case CSRRC:
+      sprintf(output, "csrrc x%d, %d, x%d", rd, csr, rs1);
+      break;
+    case CSRRWI:
+      sprintf(output, "csrrwi x%d, %d, %d", rd, csr, rs1 & 0x1F);
+      break;
+    case CSRRSI:
+      sprintf(output, "csrrsi x%d, %d, %d", rd, csr, rs1 & 0x1F);
+      break;
+    case CSRRCI:
+      sprintf(output, "csrrci x%d, %d, %d", rd, csr, rs1 & 0x1F);
+      break;
+    case MRET:
+      sprintf(output, "mret");
+      break;
+    case SRET:
+      sprintf(output, "sret");
+      break;
+    case 0:
+      sprintf(output, "ecall");
+    default:
+      sprintf(output, "Unknown CSR instruction");
+      break;
+    }
     break;
 
   default:
