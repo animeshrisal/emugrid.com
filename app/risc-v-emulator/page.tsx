@@ -197,12 +197,16 @@ export default function Emulator() {
 
       <input type="file" onChange={handleFileChange} />
       <div className={styles['emulator-container']} >
-        <Registers />
+        <div>
+          <Registers />
+          <br />
+          {cpu && <div>Mode: {cpu?.mode}</div>}
+        </div>
         <Uart />
+        <div>
+          <InstructionList instructions={disassembleCode} current={currentInstruction} />
 
-        <div id="output"></div>
-        <div>{}</div>
-        <InstructionList instructions={disassembleCode} current={currentInstruction} />
+        </div>
       </div>
     </div >
   )

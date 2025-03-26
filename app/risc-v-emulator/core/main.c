@@ -101,7 +101,7 @@ void handle_instruction() {
 
 int main_loop() {
   handle_instruction();
-  return cpu_instance->pc / 4;
+  return (cpu_instance->pc / 4) - 1;
 }
 
 char *show_disassembled_code() {

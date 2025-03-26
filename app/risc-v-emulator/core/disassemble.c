@@ -18,6 +18,7 @@ char *disassemble_instruction(uint32 instr) {
   }
 
   switch (opcode) {
+
   case R:
     switch (func3) {
     case ADDSUB:
@@ -186,39 +187,41 @@ char *disassemble_instruction(uint32 instr) {
     break;
 
   case CSR:
-    switch (func3) {
-    case CSRRW:
-      sprintf(output, "csrrw x%d, %d, x%d", rd, csr, rs1);
-      break;
-    case CSRRS:
-      sprintf(output, "csrrs x%d, %d, x%d", rd, csr, rs1);
-      break;
-    case CSRRC:
-      sprintf(output, "csrrc x%d, %d, x%d", rd, csr, rs1);
-      break;
-    case CSRRWI:
-      sprintf(output, "csrrwi x%d, %d, %d", rd, csr, rs1 & 0x1F);
-      break;
-    case CSRRSI:
-      sprintf(output, "csrrsi x%d, %d, %d", rd, csr, rs1 & 0x1F);
-      break;
-    case CSRRCI:
-      sprintf(output, "csrrci x%d, %d, %d", rd, csr, rs1 & 0x1F);
-      break;
+    if (instr == MRET) {
+      sprintf(output, "mret");
+    } else if (instr == SRET) {
+      sprintf(output, "sret");
+    } else {
+      switch (func3) {
+      case CSRRW:
+        sprintf(output, "csrrw x%d, %d, x%d", rd, csr, rs1);
+        break;
+      case CSRRS:
+        sprintf(output, "csrrs x%d, %d, x%d", rd, csr, rs1);
+        break;
+      case CSRRC:
+        sprintf(output, "csrrc x%d, %d, x%d", rd, csr, rs1);
+        break;
+      case CSRRWI:
+        sprintf(output, "csrrwi x%d, %d, %d", rd, csr, rs1 & 0x1F);
+        break;
+      case CSRRSI:
+        sprintf(output, "csrrsi x%d, %d, %d", rd, csr, rs1 & 0x1F);
+        break;
+      case CSRRCI:
+        sprintf(output, "csrrci x%d, %d, %d", rd, csr, rs1 & 0x1F);
+        break;
 
-    case 0:
-      sprintf(output, "ecall");
-    default:
-      sprintf(output, "Unknown CSR instruction");
-      break;
+      case ECALL:
+        sprintf(output, "ecall");
+        break;
+      default:
+        sprintf(output, "Unknown CSR instruction");
+        break;
+      }
     }
     break;
-  case MRET:
-    sprintf(output, "mret");
-    break;
-  case SRET:
-    sprintf(output, "sret");
-    break;
+
   default:
     sprintf(output, "Unknown instruction");
     break;

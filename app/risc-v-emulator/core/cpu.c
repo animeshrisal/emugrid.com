@@ -419,13 +419,13 @@ void take_trap(CPU *cpu) {
 
     switch (prev_mode) {
     case USER:
-      write_sstatus(cpu, USER, MSTATUS_MPP_SHIFT);
+      write_mstatus(cpu, USER, MSTATUS_MPP_SHIFT);
       break;
     case SUPERVISOR:
-      write_sstatus(cpu, SUPERVISOR, MSTATUS_MPP_SHIFT);
+      write_mstatus(cpu, SUPERVISOR, MSTATUS_MPP_SHIFT);
       break;
     case MACHINE:
-      write_sstatus(cpu, MACHINE, MSTATUS_MPP_SHIFT);
+      write_mstatus(cpu, MACHINE, MSTATUS_MPP_SHIFT);
       break;
     default:
       printf("Previous privilege mode is invalid\n");
@@ -444,9 +444,7 @@ void run_csr_instructions(CPU *cpu, uint32 instr) {
   uint32 csr_value = cpu->csr[csr];
 
   if (func3 == 0) {
-
     run_ecall_instruction(cpu);
-
   } else {
     switch (func3) {
     case CSRRW:
@@ -474,10 +472,6 @@ void run_csr_instructions(CPU *cpu, uint32 instr) {
       cpu->x[rd] = csr_value;
       cpu->csr[csr] &= ~(rs1 & 0x1F);
       break;
-    case MRET:
-      run_mret_instruction(cpu);
-    case SRET:
-      run_sret_instruction(cpu);
     default:
       break;
     }

@@ -6,7 +6,9 @@
     padding-bottom: 2rem;
   }
 
-  .inactive-code {
-    display: none;
+  .active-code {
+    color: red;
   }
+
+  .inactive-code {}
 }
