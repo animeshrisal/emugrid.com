@@ -38,6 +38,7 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
   case ADDSUB:
     switch (func7) {
     case ADD:
+      printf("ADd\n");
       regs[rd] = regs[rs1] + regs[rs2];
       break;
     case SUB:
@@ -51,7 +52,6 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
     break;
 
   case SLT:
-
     regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0;
     break;
 
@@ -96,6 +96,7 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
   uint64 *regs = cpu->x;
   switch (func3) {
   case ADD:
+    printf("add rs1 + %d\n", imm);
     regs[rd] = regs[rs1] + imm;
     break;
   case XOR:
@@ -139,49 +140,50 @@ void run_b_instructions(CPU *cpu, uint32 instr) {
   int32 imm = ((int32)(instr & 0x80000000) >> 19) | ((instr & 0x80) << 4) |
               ((instr >> 20) & 0x7e0) | ((instr >> 7) & 0x1e);
 
-  int func3 = (instr >> 12) & 0x7; // func3 (3 bit
-  //
+  int func3 = (instr >> 12) & 0x7;
   switch (func3) {
+
   case BEQ:
-    if (rs1 == rs2) {
+    if (cpu->x[rs1] == cpu->x[rs2]) {
       cpu->pc += imm;
-    };
-
+    }
     break;
+
   case BNE:
-    if (rs1 != rs2) {
+    if (cpu->x[rs1] != cpu->x[rs2]) {
       cpu->pc += imm;
     }
     break;
+
   case BLT:
-    if (rs1 < rs2) {
+    if ((int32)cpu->x[rs1] < (int32)cpu->x[rs2]) {
       cpu->pc += imm;
     }
-
     break;
+
   case BGE:
-    if (rs1 >= rs2) {
+    if ((int32)cpu->x[rs1] >= (int32)cpu->x[rs2]) {
       cpu->pc += imm;
     }
-
     break;
+
   case BLTU:
-    if (rs1 < rs2) {
+    if ((uint32)cpu->x[rs1] < (uint32)cpu->x[rs2]) {
       cpu->pc += imm;
     }
-
     break;
+
   case BGEU:
-    if (rs1 >= rs2) {
+    if ((uint32_t)cpu->x[rs1] >= (uint32_t)cpu->x[rs2]) {
       cpu->pc += imm;
     }
-
     break;
+
   default:
     break;
   }
 
-  cpu->pc -= 0x4;
+  cpu->pc -= 4;
 }
 
 void run_l_instructions(CPU *cpu, uint32 instr) {
@@ -282,18 +284,11 @@ void run_ecall_instruction(CPU *cpu) {
 }
 
 void exec_jal(CPU *cpu, uint32 instr) {
-  uint64 imm = (((int32)(instr & 0x80000000) >> 11) &
-                0xFFFFF000) |           // imm[20] (sign-extended)
-               (instr & 0xFF000) |      // imm[19:12]
-               ((instr >> 9) & 0x800) | // imm[11]
-               ((instr >> 20) & 0x7FE); // imm[10:1]
-                                        // Bits 19:12
+  uint64 imm = (((int32)(instr & 0x80000000) >> 11) & 0xFFFFF000) |
+               (instr & 0xFF000) | ((instr >> 9) & 0x800) |
+               ((instr >> 20) & 0x7FE);
 
-  int rd = rd(instr);
-
-  cpu->x[rd] = cpu->pc + 4;
-
-  cpu->pc = cpu->pc + (int64)imm;
+  cpu->pc = cpu->pc + (int64)imm - 4;
 }
 
 void exec_jalr(CPU *cpu, uint32 instr) {

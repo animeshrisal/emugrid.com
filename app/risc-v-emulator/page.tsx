@@ -159,7 +159,8 @@ export default function Emulator() {
   };
 
   const handleNextInstruction = () => {
-    const pc = wasm.ccall<number, number>('main_loop', 'number', ['number'], [])
+    const pc = wasm.ccall<number, number>('main_loop', 'number', ['number'], []);
+    console.log("pc " + pc);
     const cpu_ptr = wasm.ccall<number, void[]>('get_cpu_ptr', 'number', [], []);
     const uart_ptr = wasm.ccall<number, void[]>('get_uart_ptr', 'number', [], []);
     setCurrentInstruction(pc);

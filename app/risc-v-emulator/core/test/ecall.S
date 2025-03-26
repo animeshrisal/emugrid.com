@@ -2,9 +2,11 @@
     .globl _start
 
 _start:
+  csrw mstatus, t0
   la t0, print
   csrw mtvec, t0
   ecall
+  addi x2, x0, 400
   j loop
 
 print:

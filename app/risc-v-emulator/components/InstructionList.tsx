@@ -12,7 +12,7 @@ export default function InstructionList({ instructions, current }: InstructionLi
       <div className={styles['header']}>Code</div>
       <ul>{
         instructions.map((code: string, index: number) => <li key={index}>
-          <span className={current == index ? styles['active-code'] : styles['inactive-code']}>{code}</span>
+          <span className={current + 1 == index ? styles['active-code'] : styles['inactive-code']}>{code}</span>
         </li>
         )
       }</ul>

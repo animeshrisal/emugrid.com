@@ -18,7 +18,6 @@ char *disassemble_instruction(uint32 instr) {
   }
 
   switch (opcode) {
-
   case R:
     switch (func3) {
     case ADDSUB:
@@ -188,48 +187,39 @@ char *disassemble_instruction(uint32 instr) {
 
   case CSR:
 
-    printf("Got here \n");
-    printf("%d\n", func3);
-    if (instr == MRET) {
-      sprintf(output, "mret", "");
+    switch (func3) {
+    case CSRRW:
+      sprintf(output, "csrrw x%d, %d, x%d", rd, csr, rs1);
       break;
-    } else if (instr == SRET) {
-      sprintf(output, "sret", "");
+    case CSRRS:
+      sprintf(output, "csrrs x%d, %d, x%d", rd, csr, rs1);
       break;
-    } else {
-      if (func3 == 0) {
-        sprintf(output, "ecall", "");
-      } else {
-        switch (func3) {
-        case CSRRW:
-          sprintf(output, "csrrw x%d, %d, x%d", rd, csr, rs1);
-          break;
-        case CSRRS:
-          sprintf(output, "csrrs x%d, %d, x%d", rd, csr, rs1);
-          break;
-        case CSRRC:
-          sprintf(output, "csrrc x%d, %d, x%d", rd, csr, rs1);
-          break;
-        case CSRRWI:
-          sprintf(output, "csrrwi x%d, %d, %d", rd, csr, rs1 & 0x1F);
-          break;
-        case CSRRSI:
-          sprintf(output, "csrrsi x%d, %d, %d", rd, csr, rs1 & 0x1F);
-          break;
-        case CSRRCI:
-          sprintf(output, "csrrci x%d, %d, %d", rd, csr, rs1 & 0x1F);
-          break;
-        case ECALL:
-          printf("ecall \n");
-          break;
-        default:
-          sprintf(output, "Unknown CSR instruction");
-          break;
-        }
-      }
+    case CSRRC:
+      sprintf(output, "csrrc x%d, %d, x%d", rd, csr, rs1);
+      break;
+    case CSRRWI:
+      sprintf(output, "csrrwi x%d, %d, %d", rd, csr, rs1 & 0x1F);
+      break;
+    case CSRRSI:
+      sprintf(output, "csrrsi x%d, %d, %d", rd, csr, rs1 & 0x1F);
+      break;
+    case CSRRCI:
+      sprintf(output, "csrrci x%d, %d, %d", rd, csr, rs1 & 0x1F);
+      break;
+
+    case 0:
+      sprintf(output, "ecall");
+    default:
+      sprintf(output, "Unknown CSR instruction");
+      break;
     }
     break;
-
+  case MRET:
+    sprintf(output, "mret");
+    break;
+  case SRET:
+    sprintf(output, "sret");
+    break;
   default:
     sprintf(output, "Unknown instruction");
     break;
