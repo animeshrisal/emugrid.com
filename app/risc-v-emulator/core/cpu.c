@@ -258,13 +258,12 @@ void run_u_instructions(CPU *cpu, uint32 instr) {
   int rd = rd(instr);
   int32 imm = (uint64)(int64)(int32)(instr & 0xFFFFF000);
   uint64 *regs = cpu->x;
-
   switch (opcode) {
   case LUI:
-    regs[rd] = imm; // Load Upper Immediate
+    regs[rd] = imm;
     break;
   case AUI:
-    regs[rd] = cpu->pc + imm; // AUIPC: Add Upper Immediate to PC
+    regs[rd] = cpu->pc + imm;
     break;
   default:
     printf("Illegal U-type instruction\n");

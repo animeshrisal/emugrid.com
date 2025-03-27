@@ -10,38 +10,39 @@ _start:
   j loop
 
 print:
-    li a2, 0x10000000 #Address of uart
-    li a1, 'H'             # Character 'H'
+    li a2, 0x10000000     
+    li a1, 'H'             
+
     sb a1, 0(a2)
 
-    li a1, 'e'             # Character 'e'
+    li a1, 'e'             
     sb a1, 0(a2)
 
-    li a1, 'l'             # Character 'l'
+    li a1, 'l'             
     sb a1, 0(a2)
 
-    li a1, 'l'             # Character 'l'
+    li a1, 'l'            
     sb a1, 0(a2)
 
-    li a1, 'o'             # Character 'o'
+    li a1, 'o'             
     sb a1, 0(a2)
 
-    li a1, ' '             # Space
+    li a1, ' '             
     sb a1, 0(a2)
 
-    li a1, 'W'             # Character 'W'
+    li a1, 'W'             
     sb a1, 0(a2)
 
-    li a1, 'o'             # Character 'o'
+    li a1, 'o'             
     sb a1, 0(a2)
 
-    li a1, 'r'             # Character 'r'
+    li a1, 'r'             
     sb a1, 0(a2)
 
-    li a1, 'l'             # Character 'l'
+    li a1, 'l'            
     sb a1, 0(a2)
 
-    li a1, 'd'             # Character 'd'
+    li a1, 'd'             
     sb a1, 0(a2)
 
     li a1, 10              

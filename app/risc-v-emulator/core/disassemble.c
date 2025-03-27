@@ -168,6 +168,7 @@ char *disassemble_instruction(uint32 instr) {
     break;
 
   case AUI:
+    imm = (uint64)(int64)(int32)(instr & 0xFFFFF000);
     sprintf(output, "auipc x%d, %d", rd, imm);
     break;
 
